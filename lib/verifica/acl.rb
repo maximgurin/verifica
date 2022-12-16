@@ -1,10 +1,6 @@
 require "set"
 
 module Verifica
-  EMPTY_ARRAY = [].freeze
-  EMPTY_SET = Set.new.freeze
-  private_constant :EMPTY_ARRAY, :EMPTY_SET
-
   class Acl
     def self.build
       builder = AclBuilder.new
