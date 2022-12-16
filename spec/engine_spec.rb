@@ -51,6 +51,12 @@ RSpec.describe Verifica::Engine do
     current_user = user_struct.new(SecureRandom.uuid, true)
     post = post_struct.new(SecureRandom.uuid, SecureRandom.uuid)
 
-    verifica.authorize(current_user, post, :delete)
+    result = verifica.authorize(current_user, post, :delete)
+
+    expect(result).to be_success
+    expect(result.subject_type).to be == :user
+    expect(result.subject_id).to be == current_user.subject_id
+    expect(result.resource_type).to be == :post
+    expect(result.resource_id).to be == post.resource_id
   end
 end
