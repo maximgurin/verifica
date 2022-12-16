@@ -1,10 +1,10 @@
 module Verifica
   class Ace
-    attr_reader :sid, :operation
+    attr_reader :sid, :action
 
-    def initialize(sid, operation, allow)
+    def initialize(sid, action, allow)
       @sid = sid.dup.freeze
-      @operation = operation.to_sym
+      @action = action.to_sym
       @allow = allow
       freeze
     end
@@ -18,7 +18,7 @@ module Verifica
     end
 
     def to_h
-      { sid: @sid, operation: @operation, allow: @allow }
+      { sid: @sid, action: @action, allow: @allow }
     end
 
     def ==(other)
@@ -28,12 +28,12 @@ module Verifica
     def eql?(other)
       self.class == other.class &&
         @sid == other.sid &&
-        @operation == other.operation &&
+        @action == other.action &&
         @allow == other.allow?
     end
 
     def hash
-      [self.class, @sid, @operation, @allow].hash
+      [self.class, @sid, @action, @allow].hash
     end
   end
 end

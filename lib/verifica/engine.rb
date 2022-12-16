@@ -29,8 +29,8 @@ module Verifica
       acl
     end
 
-    def authorize(subject, resource, operation, **context)
-      result = authorization_result(subject, resource, operation, **context)
+    def authorize(subject, resource, action, **context)
+      result = authorization_result(subject, resource, action, **context)
       if result.failure?
         # TODO: Write detailed message
         raise UnauthorizedError
@@ -38,8 +38,8 @@ module Verifica
       result
     end
 
-    def authorized?(subject, resource, operation, **context)
-      result = authorization_result(subject, resource, operation, **context)
+    def authorized?(subject, resource, action, **context)
+      result = authorization_result(subject, resource, action, **context)
       result.success?
     end
 
@@ -71,17 +71,17 @@ module Verifica
       resource_config(type)
     end
 
-    def authorization_result(subject, resource, operation, **context)
+    def authorization_result(subject, resource, action, **context)
       acl = resource_acl(resource, **context)
 
-      operation = operation.to_sym
-      possible_ops = config_by_resource(resource).possible_operations
-      unless possible_ops.include?(operation)
+      action = action.to_sym
+      possible_actions = config_by_resource(resource).possible_actions
+      unless possible_actions.include?(action)
         # TODO: Use own exception
-        raise ArgumentError, "Operation is not registered as possible for this resource"
+        raise ArgumentError, "Action is not registered as possible for this resource"
       end
 
-      AuthorizationResult.new(subject, resource, operation, acl, **context)
+      AuthorizationResult.new(subject, resource, action, acl, **context)
     end
   end
 end

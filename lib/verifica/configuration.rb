@@ -6,8 +6,8 @@ module Verifica
       @resources = []
     end
 
-    def register_resource(type, possible_operations, acl_provider)
-      resources << ResourceConfiguration.new(type, possible_operations, acl_provider)
+    def register_resource(type, possible_actions, acl_provider)
+      resources << ResourceConfiguration.new(type, possible_actions, acl_provider)
       self
     end
   end

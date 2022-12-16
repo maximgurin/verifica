@@ -2,29 +2,30 @@ require "set"
 
 module Verifica
   class ResourceConfiguration
-    attr_reader :resource_type, :possible_operations, :acl_provider
+    attr_reader :resource_type, :possible_actions, :acl_provider
 
-    def initialize(resource_type, possible_operations, acl_provider)
+    def initialize(resource_type, possible_actions, acl_provider)
       @resource_type = resource_type.to_sym
-      @possible_operations = operations_set(possible_operations).freeze
+      @possible_actions = action_set(possible_actions).freeze
       @acl_provider = acl_provider
       freeze
     end
 
     private
 
-    def operations_set(possible_operations)
-      if possible_operations.empty?
+    def action_set(possible_actions)
+      if possible_actions.empty?
         # TODO: Use own exception
-        raise ArgumentError, "Empty possible operations for resource, hidden bug?"
+        raise ArgumentError, "Empty possible actions for resource, hidden bug?"
       end
 
-      ops_set = possible_operations.map(&:to_sym).to_set
-      if ops_set.size < possible_operations.size
+      action_set = possible_actions.map(&:to_sym).to_set
+      if action_set.size < possible_actions.size
         # TODO: Use own exception
         raise ArgumentError, "Duplicate, hidden bug?"
       end
-      ops_set
+
+      action_set
     end
   end
 end

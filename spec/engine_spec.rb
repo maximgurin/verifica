@@ -47,7 +47,7 @@ RSpec.describe Verifica::Engine do
     end
   end
 
-  it "should authorize operation if it's allowed in ACL" do
+  it "should authorize action if it's allowed in ACL" do
     current_user = user_struct.new(SecureRandom.uuid, true)
     post = post_struct.new(SecureRandom.uuid, SecureRandom.uuid)
 

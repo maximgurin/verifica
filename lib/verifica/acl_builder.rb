@@ -5,38 +5,38 @@ module Verifica
       freeze
     end
 
-    def allow(sid, operations)
-      @aces.concat(operations.map { |op| Ace.new(sid, op, true) })
+    def allow(sid, actions)
+      @aces.concat(actions.map { |action| Ace.new(sid, action, true) })
       self
     end
 
-    def deny(sid, operations)
-      @aces.concat(operations.map { |op| Ace.new(sid, op, false) })
+    def deny(sid, actions)
+      @aces.concat(actions.map { |action| Ace.new(sid, action, false) })
       self
     end
 
-    def allow_anonymous(operations)
-      allow(Sid.anonymous, operations)
+    def allow_anonymous(actions)
+      allow(Sid.anonymous, actions)
       self
     end
 
-    def allow_authenticated(operations)
-      allow(Sid.authenticated, operations)
+    def allow_authenticated(actions)
+      allow(Sid.authenticated, actions)
       self
     end
 
-    def allow_user(user_id, operations)
-      allow(Sid.user(user_id), operations)
+    def allow_user(user_id, actions)
+      allow(Sid.user(user_id), actions)
       self
     end
 
-    def allow_organization(organization_id, operations)
-      allow(Sid.organization(organization_id), operations)
+    def allow_organization(organization_id, actions)
+      allow(Sid.organization(organization_id), actions)
       self
     end
 
-    def allow_root(operations)
-      allow(Sid.root, operations)
+    def allow_root(actions)
+      allow(Sid.root, actions)
       self
     end
 

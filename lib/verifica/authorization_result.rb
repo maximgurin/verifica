@@ -2,9 +2,9 @@
 
 module Verifica
   class AuthorizationResult
-    attr_reader :subject, :subject_sids, :resource, :operation, :acl, :context
+    attr_reader :subject, :subject_sids, :resource, :action, :acl, :context
 
-    def initialize(subject, resource, operation, acl, **context)
+    def initialize(subject, resource, action, acl, **context)
       @subject = subject
       if subject.nil?
         # TODO: Use own exception
@@ -16,14 +16,14 @@ module Verifica
         raise ArgumentError, "Subject should respond to subject_sids call and return Array or Set of SIDs"
       end
       @resource = resource
-      @operation = operation
+      @action = action
       @acl = acl
       @context = context
       freeze
     end
 
     def success?
-      acl.operation_allowed?(operation, @subject_sids)
+      acl.action_allowed?(action, @subject_sids)
     end
 
     def failure?

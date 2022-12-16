@@ -6,7 +6,7 @@ RSpec.describe Verifica::Ace do
   it "should be deep frozen after creation" do
     expect(ace).to be_frozen
     expect(ace.sid).to be_frozen
-    expect(ace.operation).to be_frozen
+    expect(ace.action).to be_frozen
   end
 
   it "should be equal to Ace with same props" do
@@ -21,7 +21,7 @@ RSpec.describe Verifica::Ace do
     first_h = ace.to_h
     second_h = ace.to_h
 
-    expect(first_h).to be == { sid: "root", operation: :read, allow: true }
+    expect(first_h).to be == { sid: "root", action: :read, allow: true }
     expect(first_h).to eql(second_h)
     expect(first_h).not_to be second_h
   end
