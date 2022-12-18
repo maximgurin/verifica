@@ -57,6 +57,12 @@ module Verifica
       @allowed_actions.select { |action| action_allowed?(action, sids) }
     end
 
+    def build
+      builder = AclBuilder.new(to_a)
+      yield builder
+      builder.build
+    end
+
     def to_a
       @aces.to_a
     end

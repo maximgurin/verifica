@@ -64,7 +64,7 @@ module Verifica
       type = resource.resource_type
       if type.nil?
         # TODO: Use own exception
-        raise ArgumentError, "Resource should respond to resource_type call and return not nil type"
+        raise ArgumentError, "Resource should respond to #resource_type and return not nil type"
       end
 
       resource_config(type)

@@ -1,7 +1,7 @@
 module Verifica
   class AclBuilder
-    def initialize
-      @aces = []
+    def initialize(initial_aces = EMPTY_ARRAY)
+      @aces = initial_aces.dup
       freeze
     end
 

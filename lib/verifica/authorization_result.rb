@@ -13,7 +13,7 @@ module Verifica
       @subject_sids = subject.subject_sids
       unless @subject_sids.is_a?(Array) || @subject_sids.is_a?(Set)
         # TODO: Use own exception
-        raise ArgumentError, "Subject should respond to subject_sids call and return Array or Set of SIDs"
+        raise ArgumentError, "Subject should respond to #subject_sids and return Array or Set of SIDs"
       end
       @resource = resource
       @action = action

@@ -139,6 +139,26 @@ RSpec.describe Verifica::Acl do
     expect(first).to be == second
   end
 
+  it "should return new ACL with additional ACEs from builder on #build call" do
+    original_acl = Verifica::Acl.build do |acl|
+      acl.allow "root", %i[write]
+    end
+    new_acl = original_acl.build do |acl|
+      acl.allow "anonymous", %i[read]
+    end
+
+    expected_original = Verifica::Acl.build do |acl|
+      acl.allow "root", %i[write]
+    end
+    expected_new = Verifica::Acl.build do |acl|
+      acl.allow "root", %i[write]
+      acl.allow "anonymous", %i[read]
+    end
+
+    expect(original_acl).to be == expected_original
+    expect(new_acl).to be == expected_new
+  end
+
   context "unknown action" do
     it "should not be allowed" do
       sids = [sid.authenticated, sid.user(other_user_id)]
