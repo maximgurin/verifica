@@ -1,5 +1,5 @@
 module Verifica
-  class Engine
+  class Authorizer
     def initialize(resource_configs)
       @resources = index_resources(resource_configs).freeze
       freeze
@@ -24,7 +24,7 @@ module Verifica
       acl = config.acl_provider.call(resource, **context)
       unless acl.is_a?(Verifica::Acl)
         # TODO: Use own exception
-        raise ArgumentError, "Resource acl_provider should respond to call and return Verifica::Acl instance"
+        raise ArgumentError, "Resource acl_provider should respond to #call and return Verifica::Acl instance"
       end
 
       acl

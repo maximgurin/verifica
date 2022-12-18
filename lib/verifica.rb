@@ -4,8 +4,8 @@ require_relative "verifica/ace"
 require_relative "verifica/acl"
 require_relative "verifica/acl_builder"
 require_relative "verifica/authorization_result"
+require_relative "verifica/authorizer"
 require_relative "verifica/configuration"
-require_relative "verifica/engine"
 require_relative "verifica/errors"
 require_relative "verifica/resource_configuration"
 require_relative "verifica/sid"
@@ -18,9 +18,9 @@ module Verifica
 
   EMPTY_ACL = Verifica::Acl.new(EMPTY_ARRAY).freeze
 
-  def self.engine
+  def self.authorizer
     config = Configuration.new
     yield config
-    Engine.new(config.resources)
+    Authorizer.new(config.resources)
   end
 end

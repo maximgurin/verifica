@@ -2,7 +2,7 @@
 
 require "securerandom"
 
-RSpec.describe Verifica::Engine do
+RSpec.describe Verifica::Authorizer do
   let(:sid) { Class.new { extend Verifica::Sid } }
   let(:user_class) do
     Struct.new(:id, :superadmin) do
@@ -42,7 +42,7 @@ RSpec.describe Verifica::Engine do
     end
   end
   let(:verifica) do
-    Verifica.engine do |config|
+    Verifica.authorizer do |config|
       config.register_resource :post, %i[read write comment delete], post_acl_provider
     end
   end
