@@ -17,7 +17,7 @@ RSpec.describe Verifica::Ace do
     expect(ace.hash).to be == same_ace.hash
   end
 
-  it "should return new hash on each to_h call" do
+  it "should return new hash on each #to_h call" do
     first_h = ace.to_h
     second_h = ace.to_h
 

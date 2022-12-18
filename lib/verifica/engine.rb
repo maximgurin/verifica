@@ -11,6 +11,7 @@ module Verifica
         # TODO: use own exception
         raise ArgumentError, "Unknown resource type, hidden bug?"
       end
+
       config
     end
 
@@ -35,17 +36,15 @@ module Verifica
         # TODO: Write detailed message
         raise UnauthorizedError
       end
+
       result
     end
 
     def authorized?(subject, resource, action, **context)
-      result = authorization_result(subject, resource, action, **context)
-      result.success?
+      authorization_result(subject, resource, action, **context).success?
     end
 
-    private
-
-    def index_resources(resource_configs)
+    private def index_resources(resource_configs)
       resource_configs.each_with_object({}) do |config, by_type|
         if by_type.key?(config.resource_type)
           # TODO: Use own exception
@@ -56,7 +55,7 @@ module Verifica
       end
     end
 
-    def config_by_resource(resource)
+    private def config_by_resource(resource)
       if resource.nil?
         # TODO: Use own exception
         raise ArgumentError, "Resource should not be nil"
@@ -71,7 +70,7 @@ module Verifica
       resource_config(type)
     end
 
-    def authorization_result(subject, resource, action, **context)
+    private def authorization_result(subject, resource, action, **context)
       acl = resource_acl(resource, **context)
 
       action = action.to_sym

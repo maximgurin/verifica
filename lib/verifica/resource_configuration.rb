@@ -11,9 +11,7 @@ module Verifica
       freeze
     end
 
-    private
-
-    def action_set(possible_actions)
+    private def action_set(possible_actions)
       if possible_actions.empty?
         # TODO: Use own exception
         raise ArgumentError, "Empty possible actions for resource, hidden bug?"

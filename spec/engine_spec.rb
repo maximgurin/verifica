@@ -4,7 +4,7 @@ require "securerandom"
 
 RSpec.describe Verifica::Engine do
   let(:sid) { Class.new { extend Verifica::Sid } }
-  let(:user_struct) do
+  let(:user_class) do
     Struct.new(:id, :superadmin) do
       include Verifica::Sid
       alias subject_id id
@@ -22,7 +22,7 @@ RSpec.describe Verifica::Engine do
       end
     end
   end
-  let(:post_struct) do
+  let(:post_class) do
     Struct.new(:id, :author_id) do
       alias resource_id id
 
@@ -32,7 +32,7 @@ RSpec.describe Verifica::Engine do
     end
   end
   let(:post_acl_provider) do
-    lambda  do |resource, **|
+    lambda do |resource, **|
       Verifica::Acl.build do |acl|
         acl.allow sid.root, %i[read write comment delete]
         acl.allow sid.user(resource.author_id), %i[read write comment delete]
@@ -48,8 +48,8 @@ RSpec.describe Verifica::Engine do
   end
 
   it "should authorize action if it's allowed in ACL" do
-    current_user = user_struct.new(SecureRandom.uuid, true)
-    post = post_struct.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(SecureRandom.uuid, true)
+    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
 
     result = verifica.authorize(current_user, post, :delete)
 
