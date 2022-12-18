@@ -8,8 +8,10 @@ module Verifica
       builder.build
     end
 
+    protected attr_reader :aces
+
     def initialize(aces)
-      @aces = aces.uniq.freeze
+      @aces = Set.new(aces).freeze
       @allow_deny_by_action = prepare_index.freeze
       @allowed_actions = Set.new
       @allow_deny_by_action.each do |action, allow_deny|
@@ -56,7 +58,7 @@ module Verifica
     end
 
     def to_a
-      @aces
+      @aces.to_a
     end
 
     def empty?
@@ -74,16 +76,14 @@ module Verifica
 
     def eql?(other)
       self.class == other.class &&
-        @aces == other.to_a
+        @aces == other.aces
     end
 
     def hash
       [self.class, @aces].hash
     end
 
-    private
-
-    def prepare_index
+    private def prepare_index
       @aces.each_with_object({}) do |ace, index|
         action = ace.action
         allow_deny = index.fetch(action) { {allowed_sids: Set.new, denied_sids: Set.new}.freeze }

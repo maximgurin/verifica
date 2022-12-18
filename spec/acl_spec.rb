@@ -20,8 +20,15 @@ RSpec.describe Verifica::Acl do
     aces = acl.to_a
 
     expect(acl).to be_frozen
-    expect(aces).to be_frozen
     expect(aces).to all(be_frozen)
+  end
+
+  it "should return new array on each #to_a call" do
+    first_a = acl.to_a
+    second_a = acl.to_a
+
+    expect(first_a).to eql(second_a)
+    expect(first_a).not_to be second_a
   end
 
   it "should allow action if any SID is allowed and no SIDs are denied" do
@@ -71,7 +78,7 @@ RSpec.describe Verifica::Acl do
     expect(acl.allowed_actions(sids)).to contain_exactly(:unpublish, :comment, :read)
   end
 
-  it "should return new set on each allowed_actions call" do
+  it "should return new set on each #allowed_actions call" do
     sids = Set.new([sid.authenticated, sid.role(moderator_role_id)])
 
     first_actions = acl.allowed_actions(sids)
@@ -99,7 +106,7 @@ RSpec.describe Verifica::Acl do
     expect(three_actions_acl.length).to eql(3)
   end
 
-  it "should be empty if aces are empty" do
+  it "should be empty if ACEs are empty" do
     empty_acl = Verifica::Acl.new([])
 
     expect(empty_acl).to be_empty
@@ -117,6 +124,19 @@ RSpec.describe Verifica::Acl do
 
     expect(acl.allowed_actions(sids)).to be_empty
     expect(acl.action_denied?(:read, sids)).to be true
+  end
+
+  it "should be == to ACL with same ACEs regardless of order" do
+    first = Verifica::Acl.build do |acl|
+      acl.allow "root", %i[write]
+      acl.allow "anonymous", %i[read]
+    end
+    second = Verifica::Acl.build do |acl|
+      acl.allow "anonymous", %i[read]
+      acl.allow "root", %i[write]
+    end
+
+    expect(first).to be == second
   end
 
   context "unknown action" do
