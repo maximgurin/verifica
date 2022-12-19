@@ -21,6 +21,10 @@ module Verifica
       { sid: @sid, action: @action, allow: @allow }
     end
 
+    def to_s
+      to_h.to_s
+    end
+
     def ==(other)
       eql?(other)
     end

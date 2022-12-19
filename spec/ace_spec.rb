@@ -14,6 +14,10 @@ RSpec.describe Verifica::Ace do
     expect(ace).not_to be_deny
   end
 
+  it "#to_s" do
+    expect(ace.to_s).to be == '{:sid=>"root", :action=>:read, :allow=>true}'
+  end
+
   it "should be equal to Ace with same props" do
     same_ace = Verifica::Ace.new("root", :read, true)
 

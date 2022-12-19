@@ -1,10 +1,10 @@
 module Verifica
-  def self.subject_sids(subject)
+  def self.subject_sids(subject, **context)
     if subject.nil?
       raise Error, "Subject should not be nil"
     end
 
-    sids = subject.subject_sids
+    sids = subject.subject_sids(**context)
     unless sids.is_a?(Array) || sids.is_a?(Set)
       raise Error, "Expected subject to respond to #subject_sids with Array or Set of SIDs but got '#{sids.class}'"
     end
@@ -21,8 +21,7 @@ module Verifica
     def authorize(subject, resource, action, **context)
       result = authorization_result(subject, resource, action, **context)
       if result.failure?
-        # TODO: Write detailed message
-        raise AuthorizationError
+        raise AuthorizationError, result
       end
 
       result

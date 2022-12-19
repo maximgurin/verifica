@@ -67,6 +67,10 @@ module Verifica
       @aces.to_a
     end
 
+    def to_s
+      @aces.map(&:to_h).to_s
+    end
+
     def empty?
       @aces.empty?
     end

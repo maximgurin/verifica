@@ -23,6 +23,12 @@ RSpec.describe Verifica::Acl do
     expect(aces).to all(be_frozen)
   end
 
+  it "#to_s" do
+    short_acl = Verifica::Acl.build { _1.allow "root", [:read] }
+
+    expect(short_acl.to_s).to be == '[{:sid=>"root", :action=>:read, :allow=>true}]'
+  end
+
   it "should return new array on each #to_a call" do
     first_a = acl.to_a
     second_a = acl.to_a

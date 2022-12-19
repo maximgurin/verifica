@@ -5,11 +5,14 @@ require "securerandom"
 RSpec.describe Verifica::Authorizer do
   let(:sid) { Class.new { extend Verifica::Sid } }
   let(:user_class) do
-    Struct.new(:id, :subject_sids) do
-      include Verifica::Sid
+    Struct.new(:id, :sids) do
       alias subject_id id
 
       def subject_type = :user
+
+      def subject_sids(**)
+        sids
+      end
     end
   end
   let(:post_class) do
@@ -54,8 +57,25 @@ RSpec.describe Verifica::Authorizer do
     user_id = SecureRandom.uuid
     current_user = user_class.new(user_id, [sid.authenticated, sid.user(user_id)])
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    message = "Authorization FAILURE. Subject 'user' id='#{current_user.subject_id}'. Resource 'post' " \
+      "id='#{post.resource_id}'. Action 'delete'"
 
-    expect { authorizer.authorize(current_user, post, :delete) }.to raise_error(Verifica::AuthorizationError)
+    expect { authorizer.authorize(current_user, post, :delete, scope: :api, type: :internal) }
+      .to raise_error(an_instance_of(Verifica::AuthorizationError).and(
+                        having_attributes(
+                          message: message,
+                          explain: /Authorization FAILURE/,
+                          subject: current_user,
+                          subject_type: :user,
+                          subject_id: current_user.subject_id,
+                          subject_sids: [sid.authenticated, sid.user(user_id)],
+                          resource: post,
+                          resource_type: :post,
+                          resource_id: post.resource_id,
+                          action: :delete,
+                          context: {scope: :api, type: :internal},
+                          acl: authorizer.resource_acl(post)
+                      )))
   end
 
   it "should return all allowed actions for given subject" do
@@ -86,7 +106,12 @@ RSpec.describe Verifica::Authorizer do
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
     unknown_msg = "'unknown_action' action is not registered as possible for 'post' resource"
 
-    expect { authorizer.authorized?(current_user, post, :unknown_action) }.to raise_error(Verifica::Error, unknown_msg)
+    expect { authorizer.authorized?(current_user, post, :unknown_action) }
+      .to raise_error(an_instance_of(Verifica::Error).and(
+                        having_attributes(
+                          message: unknown_msg,
+                          explain: unknown_msg
+                        )))
   end
 
   it "should raise exception for invalid or unknown resource" do
@@ -145,7 +170,7 @@ RSpec.describe Verifica::Authorizer do
   end
 
   it "should raise exception for resource registration duplicate" do
-    call = lambda do
+    authorizer = lambda do
       Verifica.authorizer do |config|
         config.register_resource :post, %i[read], post_acl_provider
         config.register_resource :post, %i[write], post_acl_provider
@@ -153,21 +178,24 @@ RSpec.describe Verifica::Authorizer do
     end
     msg = "'post' resource registered multiple times. Probably code copy-paste and a bug?"
 
-    expect(call).to raise_error(Verifica::Error, msg)
+    expect { authorizer.call }.to raise_error(Verifica::Error, msg)
   end
 
-  it "should forward arbitrary keyword args to ACL provider" do
+  it "should forward arbitrary keyword args to ACL provider and Subject#subject_sids" do
     provider = instance_double("AclProvider")
     verifica = Verifica.authorizer do |config|
       config.register_resource :post, %i[read write comment delete], provider
     end
-    current_user = user_class.new(SecureRandom.uuid, root_sids)
+    current_user = instance_double("User")
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
     acl = Verifica::Acl.build { _1.allow sid.root, %i[read write comment delete] }
-    kwargs = { test: 'something', something: :else }
+    kwargs = { scope: 'api', type: :internal }
 
+    allow(current_user).to receive(:subject_sids).and_return(root_sids)
     allow(provider).to receive(:call).and_return(acl)
+
     expect(provider).to receive(:call).with(post, **kwargs)
+    expect(current_user).to receive(:subject_sids).with(**kwargs)
 
     verifica.authorize(current_user, post, :read, **kwargs)
   end
