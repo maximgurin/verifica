@@ -6,24 +6,18 @@ module Verifica
 
     def initialize(subject, resource, action, acl, **context)
       @subject = subject
-      if subject.nil?
-        # TODO: Use own exception
-        raise ArgumentError, "Subject should not be nil"
-      end
-      @subject_sids = subject.subject_sids
-      unless @subject_sids.is_a?(Array) || @subject_sids.is_a?(Set)
-        # TODO: Use own exception
-        raise ArgumentError, "Subject should respond to #subject_sids and return Array or Set of SIDs"
-      end
+      sids = Verifica.subject_sids(subject)
+      @subject_sids = sids.map{ _1.dup.freeze }.freeze
       @resource = resource
       @action = action
       @acl = acl
       @context = context
+      @success = acl.action_allowed?(action, @subject_sids)
       freeze
     end
 
     def success?
-      acl.action_allowed?(action, @subject_sids)
+      @success
     end
 
     def failure?
@@ -31,7 +25,7 @@ module Verifica
     end
 
     def subject_type
-      subject.subject_type
+      subject.subject_type.to_sym
     end
 
     def subject_id
@@ -39,11 +33,15 @@ module Verifica
     end
 
     def resource_type
-      resource.resource_type
+      resource.resource_type.to_sym
     end
 
     def resource_id
       resource.resource_id
+    end
+
+    def allowed_actions
+      acl.allowed_actions(subject_sids)
     end
   end
 end

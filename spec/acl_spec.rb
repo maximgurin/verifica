@@ -12,7 +12,7 @@ RSpec.describe Verifica::Acl do
       acl.allow sid.authenticated, %i[read comment]
       acl.allow sid.role(moderator_role_id), %i[read unpublish]
       acl.allow sid.user(owner_user_id), %w[read write delete comment]
-      acl.deny sid.organization(banned_organization_id), %w[read comment]
+      acl.deny sid.organization(banned_organization_id), %w[read comment bookmark]
     end
   end
 
@@ -137,6 +137,7 @@ RSpec.describe Verifica::Acl do
     end
 
     expect(first).to be == second
+    expect(first.hash).to be == second.hash
   end
 
   it "should return new ACL with additional ACEs from builder on #build call" do
