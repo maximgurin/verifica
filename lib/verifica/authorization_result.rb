@@ -2,13 +2,18 @@
 
 module Verifica
   class AuthorizationResult
-    attr_reader :subject, :subject_sids, :resource, :action, :acl, :context
+    attr_reader :subject, :subject_id, :subject_type, :subject_sids,
+                :resource, :resource_id, :resource_type, :action, :acl, :context
 
     def initialize(subject, resource, action, acl, **context)
       @subject = subject
       sids = Verifica.subject_sids(subject, **context)
       @subject_sids = sids.map{ _1.dup.freeze }.freeze
+      @subject_id = subject.subject_id.dup.freeze
+      @subject_type = subject.subject_type&.to_sym
       @resource = resource
+      @resource_id = resource.resource_id.dup.freeze
+      @resource_type = resource.resource_type.to_sym
       @action = action
       @acl = acl
       @context = context
@@ -24,22 +29,6 @@ module Verifica
       !success?
     end
 
-    def subject_type
-      subject.subject_type.to_sym
-    end
-
-    def subject_id
-      subject.subject_id
-    end
-
-    def resource_type
-      resource.resource_type.to_sym
-    end
-
-    def resource_id
-      resource.resource_id
-    end
-
     def allowed_actions
       acl.allowed_actions(subject_sids)
     end
@@ -53,14 +42,15 @@ module Verifica
     def explain
       <<~MESSAGE
         #{message}
+
         \s\sSubject SIDs (#{subject_sids.empty? ? "empty" : subject_sids.size}):
-        \s\s#{subject_sids}
+        \s\s\s\s#{subject_sids}
 
         \s\sContext:
-        \s\s#{context}
+        \s\s\s\s#{context}
 
         \s\sResource ACL (#{acl.empty? ? "empty" : acl.size}):
-        #{acl.to_a.map { "\s\s#{_1}" }.join("\n")}
+        #{acl.to_a.map { "\s\s\s\s#{_1}" }.join("\n")}
 
         Reason: #{reason_message}
       MESSAGE

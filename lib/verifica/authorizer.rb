@@ -87,14 +87,13 @@ module Verifica
     end
 
     private def authorization_result(subject, resource, action, **context)
-      acl = resource_acl(resource, **context)
-
       action = action.to_sym
       possible_actions = config_by_resource(resource).possible_actions
       unless possible_actions.include?(action)
         raise Error, "'#{action}' action is not registered as possible for '#{resource.resource_type}' resource"
       end
 
+      acl = resource_acl(resource, **context)
       AuthorizationResult.new(subject, resource, action, acl, **context)
     end
   end

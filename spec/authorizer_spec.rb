@@ -187,12 +187,16 @@ RSpec.describe Verifica::Authorizer do
       config.register_resource :post, %i[read write comment delete], provider
     end
     current_user = instance_double("User")
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    post = instance_double("Post")
     acl = Verifica::Acl.build { _1.allow sid.root, %i[read write comment delete] }
     kwargs = { scope: 'api', type: :internal }
 
     allow(current_user).to receive(:subject_sids).and_return(root_sids)
+    allow(current_user).to receive(:subject_id).and_return(nil)
+    allow(current_user).to receive(:subject_type).and_return(nil)
     allow(provider).to receive(:call).and_return(acl)
+    allow(post).to receive(:resource_id).and_return(nil)
+    allow(post).to receive(:resource_type).and_return(:post)
 
     expect(provider).to receive(:call).with(post, **kwargs)
     expect(current_user).to receive(:subject_sids).with(**kwargs)
