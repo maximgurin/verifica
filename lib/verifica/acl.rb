@@ -36,6 +36,7 @@ module Verifica
 
       return false if allow_deny.nil? || !@allowed_actions.include?(action)
 
+      sids = sids.to_set
       allow_deny[:allowed_sids].intersect?(sids) && !allow_deny[:denied_sids].intersect?(sids)
     end
 
