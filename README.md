@@ -1,3 +1,9 @@
+----------
+[![CI](https://github.com/maximgurin/verifica/actions/workflows/ci.yml/badge.svg)](https://github.com/maximgurin/verifica/actions/workflows/ci.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/457e56b0bb514539844a94d85abe99f9)](https://www.codacy.com/gh/maximgurin/verifica/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=maximgurin/verifica&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/457e56b0bb514539844a94d85abe99f9)](https://www.codacy.com/gh/maximgurin/verifica/dashboard?utm_source=github.com&utm_medium=referral&utm_content=maximgurin/verifica&utm_campaign=Badge_Coverage)
+![GitHub](https://img.shields.io/github/license/maximgurin/verifica)
+
 # Verifica
 
 Verifica is Ruby's most scalable authorization solution, designed to support sophisticated authorization rules.
