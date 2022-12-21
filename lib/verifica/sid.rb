@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module Verifica
   module Sid
-    ANONYMOUS = "anonymous".freeze
-    AUTHENTICATED = "authenticated".freeze
-    ROOT = "root".freeze
+    ANONYMOUS = "anonymous"
+    AUTHENTICATED = "authenticated"
+    ROOT = "root"
 
     def anonymous
       ANONYMOUS

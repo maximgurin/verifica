@@ -3,12 +3,12 @@
 module Verifica
   class AuthorizationResult
     attr_reader :subject, :subject_id, :subject_type, :subject_sids,
-                :resource, :resource_id, :resource_type, :action, :acl, :context
+      :resource, :resource_id, :resource_type, :action, :acl, :context
 
     def initialize(subject, resource, action, acl, **context)
       @subject = subject
       sids = Verifica.subject_sids(subject, **context)
-      @subject_sids = sids.map{ _1.dup.freeze }.freeze
+      @subject_sids = sids.map { _1.dup.freeze }.freeze
       @subject_id = subject.subject_id.dup.freeze
       @subject_type = subject.subject_type&.to_sym
       @resource = resource

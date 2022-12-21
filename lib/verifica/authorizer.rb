@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verifica
   def self.subject_sids(subject, **context)
     if subject.nil?

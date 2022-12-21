@@ -4,7 +4,7 @@ RSpec.describe Verifica::AuthorizationResult do
   let(:sid) { Class.new { extend Verifica::Sid } }
   let(:user_class) do
     Struct.new(:id, :sids) do
-      alias subject_id id
+      alias_method :subject_id, :id
 
       def subject_type = :user
 
@@ -15,7 +15,7 @@ RSpec.describe Verifica::AuthorizationResult do
   end
   let(:post_class) do
     Struct.new(:id) do
-      alias resource_id id
+      alias_method :resource_id, :id
       def resource_type = "post"
     end
   end

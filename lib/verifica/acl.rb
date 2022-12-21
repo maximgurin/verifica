@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "set"
 
 module Verifica
@@ -78,7 +80,7 @@ module Verifica
     def length
       @aces.length
     end
-    alias size length
+    alias_method :size, :length
 
     def ==(other)
       eql?(other)

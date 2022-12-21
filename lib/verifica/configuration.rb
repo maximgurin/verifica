@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verifica
   class Configuration
     attr_reader :resources

@@ -6,7 +6,7 @@ RSpec.describe Verifica::Authorizer do
   let(:sid) { Class.new { extend Verifica::Sid } }
   let(:user_class) do
     Struct.new(:id, :sids) do
-      alias subject_id id
+      alias_method :subject_id, :id
 
       def subject_type = :user
 
@@ -17,7 +17,7 @@ RSpec.describe Verifica::Authorizer do
   end
   let(:post_class) do
     Struct.new(:id, :author_id) do
-      alias resource_id id
+      alias_method :resource_id, :id
 
       def resource_type = "post"
     end
@@ -62,20 +62,21 @@ RSpec.describe Verifica::Authorizer do
 
     expect { authorizer.authorize(current_user, post, :delete, scope: :api, type: :internal) }
       .to raise_error(an_instance_of(Verifica::AuthorizationError).and(
-                        having_attributes(
-                          message: message,
-                          explain: /Authorization FAILURE/,
-                          subject: current_user,
-                          subject_type: :user,
-                          subject_id: current_user.subject_id,
-                          subject_sids: [sid.authenticated, sid.user(user_id)],
-                          resource: post,
-                          resource_type: :post,
-                          resource_id: post.resource_id,
-                          action: :delete,
-                          context: {scope: :api, type: :internal},
-                          acl: authorizer.resource_acl(post)
-                      )))
+        having_attributes(
+          message: message,
+          explain: /Authorization FAILURE/,
+          subject: current_user,
+          subject_type: :user,
+          subject_id: current_user.subject_id,
+          subject_sids: [sid.authenticated, sid.user(user_id)],
+          resource: post,
+          resource_type: :post,
+          resource_id: post.resource_id,
+          action: :delete,
+          context: {scope: :api, type: :internal},
+          acl: authorizer.resource_acl(post)
+        )
+      ))
   end
 
   it "should return all allowed actions for given subject" do
@@ -94,7 +95,6 @@ RSpec.describe Verifica::Authorizer do
     expect(authorizer.authorized?(current_user, post, :delete)).to be false
   end
 
-
   it "should return true/false in #resource_config?" do
     expect(authorizer.resource_config?(:post)).to be true
     expect(authorizer.resource_config?("post")).to be true
@@ -108,10 +108,11 @@ RSpec.describe Verifica::Authorizer do
 
     expect { authorizer.authorized?(current_user, post, :unknown_action) }
       .to raise_error(an_instance_of(Verifica::Error).and(
-                        having_attributes(
-                          message: unknown_msg,
-                          explain: unknown_msg
-                        )))
+        having_attributes(
+          message: unknown_msg,
+          explain: unknown_msg
+        )
+      ))
   end
 
   it "should raise exception for invalid or unknown resource" do
@@ -135,12 +136,16 @@ RSpec.describe Verifica::Authorizer do
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
     nil_sids = Class.new do
       def subject_id = SecureRandom.uuid
+
       def subject_type = :user
+
       def subject_sids = nil
     end.new
     string_sids = Class.new do
       def subject_id = SecureRandom.uuid
+
       def subject_type = :user
+
       def subject_sids = "root"
     end.new
     nil_sids_msg = "Expected subject to respond to #subject_sids with Array or Set of SIDs but got 'NilClass'"
@@ -189,7 +194,7 @@ RSpec.describe Verifica::Authorizer do
     current_user = instance_double("User")
     post = instance_double("Post")
     acl = Verifica::Acl.build { _1.allow sid.root, %i[read write comment delete] }
-    kwargs = { scope: 'api', type: :internal }
+    kwargs = {scope: "api", type: :internal}
 
     allow(current_user).to receive(:subject_sids).and_return(root_sids)
     allow(current_user).to receive(:subject_id).and_return(nil)

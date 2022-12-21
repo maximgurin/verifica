@@ -11,6 +11,8 @@ group :test do
 end
 
 group :tools do
-  gem "rubocop", "~> 1.40.0"
+  gem "rubocop"
+  gem "rubocop-rspec"
+  gem "standard", "~> 1.20.0"
   gem "byebug"
 end

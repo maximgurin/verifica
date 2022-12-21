@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verifica
   class AclBuilder
     def initialize(initial_aces = EMPTY_ARRAY)

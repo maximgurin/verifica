@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verifica
   class Ace
     attr_reader :sid, :action
@@ -18,7 +20,7 @@ module Verifica
     end
 
     def to_h
-      { sid: @sid, action: @action, allow: @allow }
+      {sid: @sid, action: @action, allow: @allow}
     end
 
     def to_s
