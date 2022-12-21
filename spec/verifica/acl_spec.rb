@@ -1,13 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Verifica::Acl do
-  let(:sid) { Class.new { extend Verifica::Sid } }
-  let(:owner_user_id) { 777 }
-  let(:other_user_id) { 321 }
-  let(:banned_organization_id) { 666 }
-  let(:moderator_role_id) { "moderator" }
-  let(:acl) do
-    Verifica::Acl.build do |acl|
+  subject(:acl) do
+    described_class.build do |acl|
       acl.allow sid.anonymous, %i[read]
       acl.allow sid.authenticated, %i[read comment]
       acl.allow sid.role(moderator_role_id), %i[read unpublish]
@@ -16,7 +11,13 @@ RSpec.describe Verifica::Acl do
     end
   end
 
-  it "should be deep frozen after creation" do
+  let(:sid) { Class.new { extend Verifica::Sid } }
+  let(:owner_user_id) { 777 }
+  let(:other_user_id) { 321 }
+  let(:banned_organization_id) { 666 }
+  let(:moderator_role_id) { "moderator" }
+
+  it "is deep frozen after creation" do
     aces = acl.to_a
 
     expect(acl).to be_frozen
@@ -24,12 +25,12 @@ RSpec.describe Verifica::Acl do
   end
 
   it "#to_s" do
-    short_acl = Verifica::Acl.build { _1.allow "root", [:read] }
+    short_acl = described_class.build { _1.allow "root", [:read] }
 
     expect(short_acl.to_s).to be == '[{:sid=>"root", :action=>:read, :allow=>true}]'
   end
 
-  it "should return new array on each #to_a call" do
+  it "returns new array on each #to_a call" do
     first_a = acl.to_a
     second_a = acl.to_a
 
@@ -37,40 +38,40 @@ RSpec.describe Verifica::Acl do
     expect(first_a).not_to be second_a
   end
 
-  it "should allow action if any SID is allowed and no SIDs are denied" do
+  it "allows action if any SID is allowed and no SIDs are denied" do
     sids = [sid.authenticated, sid.user(other_user_id)]
 
     expect(acl.action_allowed?(:read, sids)).to be true
     expect(acl.action_denied?(:read, sids)).to be false
   end
 
-  it "should allow action if all SIDs are allowed no SIDs are denied" do
+  it "allows action if all SIDs are allowed no SIDs are denied" do
     sids = [sid.authenticated, sid.user(owner_user_id)]
 
     expect(acl.action_allowed?(:comment, sids)).to be true
   end
 
-  it "should deny action if any SID is denied" do
+  it "denies action if any SID is denied" do
     sids = [sid.authenticated, sid.organization(banned_organization_id)]
 
     expect(acl.action_allowed?(:read, sids)).to be false
   end
 
-  it "should deny action if no SIDs are allowed" do
+  it "denies action if no SIDs are allowed" do
     sids = [sid.anonymous, "some random SID"]
 
     expect(acl.action_allowed?(:unpublish, sids)).to be false
   end
 
-  it "should return all allowed SIDs for action" do
+  it "returns all allowed SIDs for action" do
     sids = acl.allowed_sids(:comment)
 
-    expect(acl.allowed_sids(:comment)).to contain_exactly(sid.user(owner_user_id), sid.authenticated)
+    expect(sids).to contain_exactly(sid.user(owner_user_id), sid.authenticated)
     expect(sids).to be_frozen
     expect(sids).to all(be_frozen)
   end
 
-  it "should return all denied SIDs for action" do
+  it "returns all denied SIDs for action" do
     sids = acl.denied_sids(:read)
 
     expect(sids).to contain_exactly(sid.organization(banned_organization_id))
@@ -78,13 +79,13 @@ RSpec.describe Verifica::Acl do
     expect(sids).to all(be_frozen)
   end
 
-  it "should return all allowed actions for set of SIDs" do
+  it "returns all allowed actions for set of SIDs" do
     sids = Set.new([sid.authenticated, sid.role(moderator_role_id)])
 
     expect(acl.allowed_actions(sids)).to contain_exactly(:unpublish, :comment, :read)
   end
 
-  it "should return new set on each #allowed_actions call" do
+  it "returns new set on each #allowed_actions call" do
     sids = Set.new([sid.authenticated, sid.role(moderator_role_id)])
 
     first_actions = acl.allowed_actions(sids)
@@ -94,50 +95,50 @@ RSpec.describe Verifica::Acl do
     expect(first_actions).not_to be second_actions
   end
 
-  it "should return no allowed actions for denied SIDs" do
+  it "returns no allowed actions for denied SIDs" do
     sids = Set.new([sid.authenticated, sid.organization(banned_organization_id)])
 
     expect(acl.allowed_actions(sids)).to be_empty
   end
 
-  it "should remove duplicate entries" do
-    three_actions_acl = Verifica::Acl.build do |acl|
+  it "removes duplicate entries" do
+    three_actions_acl = described_class.build do |acl|
       acl.allow sid.root, %i[read write delete]
       acl.allow sid.root, %i[read write]
       acl.allow sid.root, %i[delete read]
     end
 
     expect(three_actions_acl).not_to be_empty
-    expect(three_actions_acl.size).to eql(3)
-    expect(three_actions_acl.length).to eql(3)
+    expect(three_actions_acl.size).to be(3)
+    expect(three_actions_acl.length).to be(3)
   end
 
-  it "should be empty if ACEs are empty" do
-    empty_acl = Verifica::Acl.new([])
+  it "is empty if ACEs are empty" do
+    empty_acl = described_class.new([])
 
     expect(empty_acl).to be_empty
   end
 
-  it "should convert string action to symbol" do
+  it "converts string action to symbol" do
     sids = [sid.authenticated, sid.user(other_user_id)]
 
     expect(acl.action_allowed?("read", sids)).to be true
     expect(acl.action_denied?("read", sids)).to be false
   end
 
-  it "should not allow anything for empty SIDs" do
+  it "does not allow anything for empty SIDs" do
     sids = []
 
     expect(acl.allowed_actions(sids)).to be_empty
     expect(acl.action_denied?(:read, sids)).to be true
   end
 
-  it "should be == to ACL with same ACEs regardless of order" do
-    first = Verifica::Acl.build do |acl|
+  it "is == to ACL with same ACEs regardless of order" do
+    first = described_class.build do |acl|
       acl.allow "root", %i[write]
       acl.allow "anonymous", %i[read]
     end
-    second = Verifica::Acl.build do |acl|
+    second = described_class.build do |acl|
       acl.allow "anonymous", %i[read]
       acl.allow "root", %i[write]
     end
@@ -146,18 +147,18 @@ RSpec.describe Verifica::Acl do
     expect(first.hash).to be == second.hash
   end
 
-  it "should return new ACL with additional ACEs from builder on #build call" do
-    original_acl = Verifica::Acl.build do |acl|
+  it "returns new ACL with additional ACEs from builder on #build call" do
+    original_acl = described_class.build do |acl|
       acl.allow "root", %i[write]
     end
     new_acl = original_acl.build do |acl|
       acl.allow "anonymous", %i[read]
     end
 
-    expected_original = Verifica::Acl.build do |acl|
+    expected_original = described_class.build do |acl|
       acl.allow "root", %i[write]
     end
-    expected_new = Verifica::Acl.build do |acl|
+    expected_new = described_class.build do |acl|
       acl.allow "root", %i[write]
       acl.allow "anonymous", %i[read]
     end
@@ -166,15 +167,15 @@ RSpec.describe Verifica::Acl do
     expect(new_acl).to be == expected_new
   end
 
-  context "unknown action" do
-    it "should not be allowed" do
+  context "when action is not registered" do
+    it "action is not allowed" do
       sids = [sid.authenticated, sid.user(other_user_id)]
 
       expect(acl.action_allowed?(:unknown_action, sids)).to be false
       expect(acl.action_denied?(:unknown_action, sids)).to be true
     end
 
-    it "should not have allowed or denied sids" do
+    it "has empty allowed or denied sids" do
       expect(acl.allowed_sids(:unknown_action)).to be_empty
       expect(acl.denied_sids(:unknown_action)).to be_empty
     end

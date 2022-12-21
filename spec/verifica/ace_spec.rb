@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe Verifica::Ace do
-  let(:ace) { Verifica::Ace.new("root", "read", true) }
+  subject(:ace) { described_class.new("root", "read", true) }
 
-  it "should be deep frozen after creation" do
+  it "is deep frozen after creation" do
     expect(ace).to be_frozen
     expect(ace.sid).to be_frozen
     expect(ace.action).to be_frozen
   end
 
-  it "should return correct #allow? #deny?" do
+  it "returns correct #allow? #deny?" do
     expect(ace).to be_allow
     expect(ace).not_to be_deny
   end
@@ -18,15 +18,15 @@ RSpec.describe Verifica::Ace do
     expect(ace.to_s).to be == '{:sid=>"root", :action=>:read, :allow=>true}'
   end
 
-  it "should be equal to Ace with same props" do
-    same_ace = Verifica::Ace.new("root", :read, true)
+  it "is equal to Ace with same props" do
+    same_ace = described_class.new("root", :read, true)
 
     expect(ace).to eql(same_ace)
     expect(ace).to be == same_ace
     expect(ace.hash).to be == same_ace.hash
   end
 
-  it "should return new hash on each #to_h call" do
+  it "returns new hash on each #to_h call" do
     first_h = ace.to_h
     second_h = ace.to_h
 
@@ -36,12 +36,12 @@ RSpec.describe Verifica::Ace do
   end
 
   [
-    Verifica::Ace.new("user", :read, true),
-    Verifica::Ace.new("root", :write, true),
-    Verifica::Ace.new("root", :read, false),
-    Verifica::Ace.new("anon", :read, true)
+    described_class.new("user", :read, true),
+    described_class.new("root", :write, true),
+    described_class.new("root", :read, false),
+    described_class.new("anon", :read, true)
   ].each do |different_ace|
-    it "should not be equal to Ace with different props" do
+    it "is not equal to Ace with different props" do
       expect(ace).not_to eql(different_ace)
       expect(ace).not_to be == different_ace
       expect(ace.hash).not_to be == different_ace.hash

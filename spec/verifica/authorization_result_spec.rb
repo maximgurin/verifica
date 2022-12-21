@@ -26,7 +26,7 @@ RSpec.describe Verifica::AuthorizationResult do
     acl = Verifica::Acl.build { _1.allow sid.root, %i[read write] }
     context = {scope: :api, type: "internal"}
 
-    result = Verifica::AuthorizationResult.new(current_user, post, :read, acl, **context)
+    result = described_class.new(current_user, post, :read, acl, **context)
     explain = result.explain
     reason = %{Reason: subject SID(s) ["root"] allowed for 'read' action. No SIDs denied among subject SIDs}
 
@@ -43,7 +43,7 @@ RSpec.describe Verifica::AuthorizationResult do
     post = post_class.new(SecureRandom.uuid)
     acl = Verifica::Acl.build { _1.allow sid.root, %i[read write] }
 
-    result = Verifica::AuthorizationResult.new(current_user, post, :read, acl)
+    result = described_class.new(current_user, post, :read, acl)
     explain = result.explain
     reason = "Reason: subject SIDs are empty, no actions allowed for any resource"
 
@@ -56,7 +56,7 @@ RSpec.describe Verifica::AuthorizationResult do
     current_user = user_class.new(SecureRandom.uuid, [sid.root])
     post = post_class.new(SecureRandom.uuid)
 
-    result = Verifica::AuthorizationResult.new(current_user, post, :read, Verifica::EMPTY_ACL)
+    result = described_class.new(current_user, post, :read, Verifica::EMPTY_ACL)
     explain = result.explain
     reason = %(Reason: resource ACL is empty, no actions allowed for any subject)
 
@@ -70,7 +70,7 @@ RSpec.describe Verifica::AuthorizationResult do
     post = post_class.new(SecureRandom.uuid)
     acl = Verifica::Acl.build { _1.allow sid.root, %i[read write] }
 
-    result = Verifica::AuthorizationResult.new(current_user, post, "read", acl)
+    result = described_class.new(current_user, post, "read", acl)
     explain = result.explain
     reason = %{Reason: among 2 subject SID(s), none is listed as allowed for 'read' action}
 
@@ -83,7 +83,7 @@ RSpec.describe Verifica::AuthorizationResult do
     post = post_class.new(SecureRandom.uuid)
     acl = Verifica::Acl.build { _1.allow(sid.root, %i[read write]).deny(sid.authenticated, %i[write]) }
 
-    result = Verifica::AuthorizationResult.new(current_user, post, :write, acl)
+    result = described_class.new(current_user, post, :write, acl)
     explain = result.explain
     reason = %{Reason: subject SID(s) ["authenticated"] denied for 'write' action. } \
       "Denied SIDs always win regardless of allowed SIDs"

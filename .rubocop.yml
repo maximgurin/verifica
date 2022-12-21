@@ -1,4 +1,6 @@
 require:
+  - rubocop-rspec
+  - rubocop-rake
   - standard
 
 inherit_gem:
@@ -13,3 +15,9 @@ Style/FrozenStringLiteralComment:
 Layout/ExtraSpacing:
   Exclude:
     - "*.gemspec"
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
