@@ -8,6 +8,8 @@ inherit_gem:
 
 AllCops:
   NewCops: enable
+  Exclude:
+    - vendor/bundle/**/*
 
 Style/FrozenStringLiteralComment:
   Enabled: true
