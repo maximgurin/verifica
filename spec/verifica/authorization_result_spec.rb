@@ -21,9 +21,9 @@ RSpec.describe Verifica::AuthorizationResult do
   end
 
   it "#explain for successful authorization" do
-    current_user = user_class.new(SecureRandom.uuid, [sid.root])
+    current_user = user_class.new(SecureRandom.uuid, [sid.root_sid])
     post = post_class.new(SecureRandom.uuid)
-    acl = Verifica::Acl.build { _1.allow sid.root, %i[read write] }
+    acl = Verifica::Acl.build { _1.allow sid.root_sid, %i[read write] }
     context = {scope: :api, type: "internal"}
 
     result = described_class.new(current_user, post, :read, acl, **context)
@@ -41,7 +41,7 @@ RSpec.describe Verifica::AuthorizationResult do
   it "#explain for empty subject SIDs" do
     current_user = user_class.new(SecureRandom.uuid, [])
     post = post_class.new(SecureRandom.uuid)
-    acl = Verifica::Acl.build { _1.allow sid.root, %i[read write] }
+    acl = Verifica::Acl.build { _1.allow sid.root_sid, %i[read write] }
 
     result = described_class.new(current_user, post, :read, acl)
     explain = result.explain
@@ -53,7 +53,7 @@ RSpec.describe Verifica::AuthorizationResult do
   end
 
   it "#explain for empty resource ACL" do
-    current_user = user_class.new(SecureRandom.uuid, [sid.root])
+    current_user = user_class.new(SecureRandom.uuid, [sid.root_sid])
     post = post_class.new(SecureRandom.uuid)
 
     result = described_class.new(current_user, post, :read, Verifica::EMPTY_ACL)
@@ -66,9 +66,9 @@ RSpec.describe Verifica::AuthorizationResult do
   end
 
   it "#explain for no allowed SIDs" do
-    current_user = user_class.new(SecureRandom.uuid, Set.new([sid.authenticated, sid.anonymous]))
+    current_user = user_class.new(SecureRandom.uuid, Set.new([sid.authenticated_sid, sid.anonymous_sid]))
     post = post_class.new(SecureRandom.uuid)
-    acl = Verifica::Acl.build { _1.allow sid.root, %i[read write] }
+    acl = Verifica::Acl.build { _1.allow sid.root_sid, %i[read write] }
 
     result = described_class.new(current_user, post, "read", acl)
     explain = result.explain
@@ -79,9 +79,9 @@ RSpec.describe Verifica::AuthorizationResult do
   end
 
   it "#explain for denied SIDs" do
-    current_user = user_class.new(SecureRandom.uuid, [sid.authenticated, sid.anonymous])
+    current_user = user_class.new(SecureRandom.uuid, [sid.authenticated_sid, sid.anonymous_sid])
     post = post_class.new(SecureRandom.uuid)
-    acl = Verifica::Acl.build { _1.allow(sid.root, %i[read write]).deny(sid.authenticated, %i[write]) }
+    acl = Verifica::Acl.build { _1.allow(sid.root_sid, %i[read write]).deny(sid.authenticated_sid, %i[write]) }
 
     result = described_class.new(current_user, post, :write, acl)
     explain = result.explain

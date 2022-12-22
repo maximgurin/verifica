@@ -3,11 +3,11 @@
 RSpec.describe Verifica::Acl do
   subject(:acl) do
     described_class.build do |acl|
-      acl.allow sid.anonymous, %i[read]
-      acl.allow sid.authenticated, %i[read comment]
-      acl.allow sid.role(moderator_role_id), %i[read unpublish]
-      acl.allow sid.user(owner_user_id), %w[read write delete comment]
-      acl.deny sid.organization(banned_organization_id), %w[read comment bookmark]
+      acl.allow sid.anonymous_sid, %i[read]
+      acl.allow sid.authenticated_sid, %i[read comment]
+      acl.allow sid.role_sid(moderator_role_id), %i[read unpublish]
+      acl.allow sid.user_sid(owner_user_id), %w[read write delete comment]
+      acl.deny sid.organization_sid(banned_organization_id), %w[read comment bookmark]
     end
   end
 
@@ -39,26 +39,26 @@ RSpec.describe Verifica::Acl do
   end
 
   it "allows action if any SID is allowed and no SIDs are denied" do
-    sids = [sid.authenticated, sid.user(other_user_id)]
+    sids = [sid.authenticated_sid, sid.user_sid(other_user_id)]
 
     expect(acl.action_allowed?(:read, sids)).to be true
     expect(acl.action_denied?(:read, sids)).to be false
   end
 
   it "allows action if all SIDs are allowed no SIDs are denied" do
-    sids = [sid.authenticated, sid.user(owner_user_id)]
+    sids = [sid.authenticated_sid, sid.user_sid(owner_user_id)]
 
     expect(acl.action_allowed?(:comment, sids)).to be true
   end
 
   it "denies action if any SID is denied" do
-    sids = [sid.authenticated, sid.organization(banned_organization_id)]
+    sids = [sid.authenticated_sid, sid.organization_sid(banned_organization_id)]
 
     expect(acl.action_allowed?(:read, sids)).to be false
   end
 
   it "denies action if no SIDs are allowed" do
-    sids = [sid.anonymous, "some random SID"]
+    sids = [sid.anonymous_sid, "some random SID"]
 
     expect(acl.action_allowed?(:unpublish, sids)).to be false
   end
@@ -66,7 +66,7 @@ RSpec.describe Verifica::Acl do
   it "returns all allowed SIDs for action" do
     sids = acl.allowed_sids(:comment)
 
-    expect(sids).to contain_exactly(sid.user(owner_user_id), sid.authenticated)
+    expect(sids).to contain_exactly(sid.user_sid(owner_user_id), sid.authenticated_sid)
     expect(sids).to be_frozen
     expect(sids).to all(be_frozen)
   end
@@ -74,19 +74,19 @@ RSpec.describe Verifica::Acl do
   it "returns all denied SIDs for action" do
     sids = acl.denied_sids(:read)
 
-    expect(sids).to contain_exactly(sid.organization(banned_organization_id))
+    expect(sids).to contain_exactly(sid.organization_sid(banned_organization_id))
     expect(sids).to be_frozen
     expect(sids).to all(be_frozen)
   end
 
   it "returns all allowed actions for set of SIDs" do
-    sids = Set.new([sid.authenticated, sid.role(moderator_role_id)])
+    sids = Set.new([sid.authenticated_sid, sid.role_sid(moderator_role_id)])
 
     expect(acl.allowed_actions(sids)).to contain_exactly(:unpublish, :comment, :read)
   end
 
   it "returns new set on each #allowed_actions call" do
-    sids = Set.new([sid.authenticated, sid.role(moderator_role_id)])
+    sids = Set.new([sid.authenticated_sid, sid.role_sid(moderator_role_id)])
 
     first_actions = acl.allowed_actions(sids)
     second_actions = acl.allowed_actions(sids)
@@ -96,16 +96,16 @@ RSpec.describe Verifica::Acl do
   end
 
   it "returns no allowed actions for denied SIDs" do
-    sids = Set.new([sid.authenticated, sid.organization(banned_organization_id)])
+    sids = Set.new([sid.authenticated_sid, sid.organization_sid(banned_organization_id)])
 
     expect(acl.allowed_actions(sids)).to be_empty
   end
 
   it "removes duplicate entries" do
     three_actions_acl = described_class.build do |acl|
-      acl.allow sid.root, %i[read write delete]
-      acl.allow sid.root, %i[read write]
-      acl.allow sid.root, %i[delete read]
+      acl.allow sid.root_sid, %i[read write delete]
+      acl.allow sid.root_sid, %i[read write]
+      acl.allow sid.root_sid, %i[delete read]
     end
 
     expect(three_actions_acl).not_to be_empty
@@ -120,7 +120,7 @@ RSpec.describe Verifica::Acl do
   end
 
   it "converts string action to symbol" do
-    sids = [sid.authenticated, sid.user(other_user_id)]
+    sids = [sid.authenticated_sid, sid.user_sid(other_user_id)]
 
     expect(acl.action_allowed?("read", sids)).to be true
     expect(acl.action_denied?("read", sids)).to be false
@@ -169,7 +169,7 @@ RSpec.describe Verifica::Acl do
 
   context "when action is not registered" do
     it "action is not allowed" do
-      sids = [sid.authenticated, sid.user(other_user_id)]
+      sids = [sid.authenticated_sid, sid.user_sid(other_user_id)]
 
       expect(acl.action_allowed?(:unknown_action, sids)).to be false
       expect(acl.action_denied?(:unknown_action, sids)).to be true

@@ -31,14 +31,14 @@ RSpec.describe Verifica::Authorizer do
   let(:post_acl_provider) do
     lambda do |resource, **|
       Verifica::Acl.build do |acl|
-        acl.allow sid.root, %i[read write comment delete]
-        acl.allow sid.user(resource.author_id), %i[read write comment delete]
-        acl.allow sid.authenticated, %i[read comment]
-        acl.allow sid.anonymous, %i[read]
+        acl.allow sid.root_sid, %i[read write comment delete]
+        acl.allow sid.user_sid(resource.author_id), %i[read write comment delete]
+        acl.allow sid.authenticated_sid, %i[read comment]
+        acl.allow sid.anonymous_sid, %i[read]
       end
     end
   end
-  let(:root_sids) { [sid.root] }
+  let(:root_sids) { [sid.root_sid] }
 
   it "authorizes action if it's allowed in ACL" do
     current_user = user_class.new(SecureRandom.uuid, root_sids)
@@ -56,7 +56,7 @@ RSpec.describe Verifica::Authorizer do
 
   it "raises exception if action is not authorized" do
     user_id = SecureRandom.uuid
-    current_user = user_class.new(user_id, [sid.authenticated, sid.user(user_id)])
+    current_user = user_class.new(user_id, [sid.authenticated_sid, sid.user_sid(user_id)])
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
     message = "Authorization FAILURE. Subject 'user' id='#{current_user.subject_id}'. Resource 'post' " \
       "id='#{post.resource_id}'. Action 'delete'"
@@ -69,7 +69,7 @@ RSpec.describe Verifica::Authorizer do
           subject: current_user,
           subject_type: :user,
           subject_id: current_user.subject_id,
-          subject_sids: [sid.authenticated, sid.user(user_id)],
+          subject_sids: [sid.authenticated_sid, sid.user_sid(user_id)],
           resource: post,
           resource_type: :post,
           resource_id: post.resource_id,
@@ -89,7 +89,7 @@ RSpec.describe Verifica::Authorizer do
 
   it "returns true/false in #authorized?" do
     user_id = SecureRandom.uuid
-    current_user = user_class.new(user_id, [sid.authenticated, sid.user(user_id)])
+    current_user = user_class.new(user_id, [sid.authenticated_sid, sid.user_sid(user_id)])
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
 
     expect(authorizer.authorized?(current_user, post, :read)).to be true
@@ -194,7 +194,7 @@ RSpec.describe Verifica::Authorizer do
     end
     current_user = instance_double(user_class)
     post = instance_double(post_class)
-    acl = Verifica::Acl.build { _1.allow sid.root, %i[read write comment delete] }
+    acl = Verifica::Acl.build { _1.allow sid.root_sid, %i[read write comment delete] }
     kwargs = {scope: "api", type: :internal}
 
     allow(current_user).to receive(:subject_sids).and_return(root_sids)

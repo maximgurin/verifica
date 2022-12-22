@@ -2,31 +2,31 @@
 
 module Verifica
   module Sid
-    ANONYMOUS = "anonymous"
-    AUTHENTICATED = "authenticated"
-    ROOT = "root"
+    ANONYMOUS_SID = "anonymous"
+    AUTHENTICATED_SID = "authenticated"
+    ROOT_SID = "root"
 
-    def anonymous
-      ANONYMOUS
+    def anonymous_sid
+      ANONYMOUS_SID
     end
 
-    def authenticated
-      AUTHENTICATED
+    def authenticated_sid
+      AUTHENTICATED_SID
     end
 
-    def root
-      ROOT
+    def root_sid
+      ROOT_SID
     end
 
-    def user(user_id)
+    def user_sid(user_id)
       "user:#{user_id}".freeze
     end
 
-    def role(role_id)
+    def role_sid(role_id)
       "role:#{role_id}".freeze
     end
 
-    def organization(organization_id)
+    def organization_sid(organization_id)
       "org:#{organization_id}".freeze
     end
   end
