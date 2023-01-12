@@ -100,7 +100,7 @@ $ bundle add verifica
 ## Core concepts
 
 Get a high-level overview of Verifica's core concepts and architecture before diving into usage nuances.
-Verifica may appear complex initially, but it prioritizes explicitness, flexibility, and scalability over over nice looking magic.
+Verifica may appear complex initially, but it prioritizes explicitness, flexibility, and scalability over nice looking magic.
 Here is an explanation of each component:
 
 ### Subject
