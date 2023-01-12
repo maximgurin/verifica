@@ -56,7 +56,7 @@ video_acl_provider = lambda do |video, **|
     acl.allow "root", [:read, :write, :delete, :comment]
     acl.allow "user:#{video.author_id}", [:read, :write, :delete, :comment]
 
-    if video.public?
+    if video.public
       acl.allow "authenticated", [:read, :comment]
     end
   end
