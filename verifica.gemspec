@@ -16,9 +16,7 @@ Gem::Specification.new do |spec|
   spec.executables   = []
   spec.require_paths = ["lib"]
   spec.description   = <<~DESCRIPTION
-    Verifica is Ruby's most scalable authorization solution, designed to support sophisticated authorization rules.
-    It works whether you have 10 or 10M records in the database. It works with any framework and any database.
-    Verifica is just a plain Ruby, zero dependencies, and no magic.
+    Verifica is Ruby's most scalable authorization solution ready to handle sophisticated authorization rules.
   DESCRIPTION
 
   spec.metadata["allowed_push_host"]     = "https://rubygems.org"

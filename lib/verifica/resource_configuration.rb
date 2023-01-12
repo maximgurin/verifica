@@ -3,9 +3,32 @@
 require "set"
 
 module Verifica
+  # Configuration object for resources registered in {Authorizer}
+  #
+  # @see Verifica.authorizer Usage examples
+  # @note Use {Configuration#register_resource} instead of this class directly
+  #
+  # @api public
   class ResourceConfiguration
-    attr_reader :resource_type, :possible_actions, :acl_provider
+    # @return [Symbol] type of the resource
+    #
+    # @api public
+    attr_reader :resource_type
 
+    # @return [Set<Symbol>] set of actions possible for this resource type
+    #
+    # @api public
+    attr_reader :possible_actions
+
+    # @return [#call] Access Control List provider for this resource type
+    #
+    # @api public
+    attr_reader :acl_provider
+
+    # @see Verifica.authorizer Usage examples
+    # @note Use {Configuration#register_resource} instead of this constructor directly
+    #
+    # @api public
     def initialize(resource_type, possible_actions, acl_provider)
       @resource_type = resource_type.to_sym
       @possible_actions = action_set(possible_actions).freeze

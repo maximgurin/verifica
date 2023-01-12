@@ -96,10 +96,10 @@ RSpec.describe Verifica::Authorizer do
     expect(authorizer.authorized?(current_user, post, :delete)).to be false
   end
 
-  it "returns true/false in #resource_config?" do
-    expect(authorizer.resource_config?(:post)).to be true
-    expect(authorizer.resource_config?("post")).to be true
-    expect(authorizer.resource_config?("unknown_type")).to be false
+  it "#resource_type?" do
+    expect(authorizer.resource_type?(:post)).to be true
+    expect(authorizer.resource_type?("post")).to be true
+    expect(authorizer.resource_type?("unknown_type")).to be false
   end
 
   it "raises exception if action is not registered for resource" do
@@ -124,7 +124,7 @@ RSpec.describe Verifica::Authorizer do
     nil_type = Class.new do
       def resource_type = nil
     end.new
-    unknown_msg = "Unknown resource 'unknown_type'. Did you forget to register this type of resource?"
+    unknown_msg = "Unknown resource 'unknown_type'. Did you forget to register this resource type?"
     nil_type_msg = "Resource should respond to #resource_type with non-nil type"
     nil_res_msg = "Resource should not be nil"
 
@@ -167,11 +167,11 @@ RSpec.describe Verifica::Authorizer do
     post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
 
     allow(provider).to receive(:call).and_return(nil)
-    msg = "'post' resource acl_provider should respond to #call with Acl instance but got 'NilClass'"
+    msg = "'post' resource acl_provider should respond to #call with Acl object but got 'NilClass'"
     expect { verifica.authorize(current_user, post, :read) }.to raise_error(Verifica::Error, msg)
 
     allow(provider).to receive(:call).and_return([])
-    msg = "'post' resource acl_provider should respond to #call with Acl instance but got 'Array'"
+    msg = "'post' resource acl_provider should respond to #call with Acl object but got 'Array'"
     expect { verifica.authorize(current_user, post, :read) }.to raise_error(Verifica::Error, msg)
   end
 

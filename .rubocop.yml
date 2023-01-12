@@ -10,6 +10,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - vendor/bundle/**/*
+    - tmp/**
 
 Style/FrozenStringLiteralComment:
   Enabled: true

@@ -1,10 +1,67 @@
 # frozen_string_literal: true
 
 module Verifica
+  # Outcome of the authorization, either successful or failed.
+  # Memoizes the state of variables that affected the decision. Could show why the authorization
+  # was successful or failed even if the concerned objects have changed.
+  #
+  # @see Authorizer#authorize
+  #
+  # @api public
   class AuthorizationResult
-    attr_reader :subject, :subject_id, :subject_type, :subject_sids,
-      :resource, :resource_id, :resource_type, :action, :acl, :context
+    # @return [Object] subject of the authorization (e.g. current user, external service)
+    #
+    # @api public
+    attr_reader :subject
 
+    # @return [Object] subject ID returned by +subject.subject_id+
+    #
+    # @api public
+    attr_reader :subject_id
+
+    # @return [Symbol, nil] subject type returned by +subject.subject_type+
+    #
+    # @api public
+    attr_reader :subject_type
+
+    # @return [Array<String>] array of subject Security Identifiers returned by +subject.subject_sids+
+    #
+    # @api public
+    attr_reader :subject_sids
+
+    # @return [Object] resource on which {#subject} attempted to perform {#action}
+    #
+    # @api public
+    attr_reader :resource
+
+    # @return [Object] resource ID returned by +resource.resource_id+
+    #
+    # @api public
+    attr_reader :resource_id
+
+    # @return [Symbol] resource type returned by resource#resource_type
+    #
+    # @api public
+    attr_reader :resource_type
+
+    # @return [Symbol] action that {#subject} attempted to perform on the {#resource}
+    #
+    # @api public
+    attr_reader :action
+
+    # @return [Acl] Access Control List returned by ACL provider registered for this {#resource_type} in {Authorizer}
+    #
+    # @api public
+    attr_reader :acl
+
+    # @return [Hash] any additional keyword arguments that have been passed to the authorization call
+    #
+    # @see Authorizer#authorize
+    #
+    # @api public
+    attr_reader :context
+
+    # @api private
     def initialize(subject, resource, action, acl, **context)
       @subject = subject
       sids = Verifica.subject_sids(subject, **context)
@@ -21,24 +78,43 @@ module Verifica
       freeze
     end
 
+    # @return [Boolean] true if given {#action} is allowed for given {#subject}
+    #
+    # @api public
     def success?
       @success
     end
 
+    # @return [Boolean] true if given {#action} is denied for given {#subject}
+    #
+    # @api public
     def failure?
       !success?
     end
 
+    # @see Acl#allowed_actions
+    #
+    # @return [Array<Symbol>] array of actions allowed for given {#subject} or empty array if none
+    #
+    # @api public
     def allowed_actions
       acl.allowed_actions(subject_sids)
     end
 
+    # @return [String] human-readable description of authorization result. Includes subject, resource, and outcome
+    #
+    # @api public
     def message
       status = success? ? "SUCCESS" : "FAILURE"
       "Authorization #{status}. Subject '#{subject_type}' id='#{subject_id}'. Resource '#{resource_type}' " \
         "id='#{resource_id}'. Action '#{action}'"
     end
 
+    # @return [String] detailed, human-readable description of authorization result.
+    #   Includes subject, resource, resource ACL, and explains the reason why authorization was successful or failed.
+    #   Extremely useful for debugging.
+    #
+    # @api public
     def explain
       <<~MESSAGE
         #{message}
