@@ -11,7 +11,7 @@ RSpec.describe Verifica::Authorizer do
 
   let(:sid) { Class.new { extend Verifica::Sid } }
   let(:user_class) do
-    Struct.new(:id, :sids) do
+    Struct.new(:id, :sids, keyword_init: true) do
       alias_method :subject_id, :id
 
       def subject_type = :user
@@ -22,7 +22,7 @@ RSpec.describe Verifica::Authorizer do
     end
   end
   let(:post_class) do
-    Struct.new(:id, :author_id) do
+    Struct.new(:id, :author_id, keyword_init: true) do
       alias_method :resource_id, :id
 
       def resource_type = "post"
@@ -41,8 +41,8 @@ RSpec.describe Verifica::Authorizer do
   let(:root_sids) { [sid.root_sid] }
 
   it "authorizes action if it's allowed in ACL" do
-    current_user = user_class.new(SecureRandom.uuid, root_sids)
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(id: SecureRandom.uuid, sids: root_sids)
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
 
     result = authorizer.authorize(current_user, post, :delete)
 
@@ -56,8 +56,8 @@ RSpec.describe Verifica::Authorizer do
 
   it "raises exception if action is not authorized" do
     user_id = SecureRandom.uuid
-    current_user = user_class.new(user_id, [sid.authenticated_sid, sid.user_sid(user_id)])
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(id: user_id, sids: [sid.authenticated_sid, sid.user_sid(user_id)])
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
     message = "Authorization FAILURE. Subject 'user' id='#{current_user.subject_id}'. Resource 'post' " \
       "id='#{post.resource_id}'. Action 'delete'"
 
@@ -81,16 +81,16 @@ RSpec.describe Verifica::Authorizer do
   end
 
   it "returns all allowed actions for given subject" do
-    current_user = user_class.new(SecureRandom.uuid, root_sids)
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(id: SecureRandom.uuid, sids: root_sids)
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
 
     expect(authorizer.allowed_actions(current_user, post)).to be == %i[read write comment delete]
   end
 
   it "returns true/false in #authorized?" do
     user_id = SecureRandom.uuid
-    current_user = user_class.new(user_id, [sid.authenticated_sid, sid.user_sid(user_id)])
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(id: user_id, sids: [sid.authenticated_sid, sid.user_sid(user_id)])
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
 
     expect(authorizer.authorized?(current_user, post, :read)).to be true
     expect(authorizer.authorized?(current_user, post, :delete)).to be false
@@ -103,8 +103,8 @@ RSpec.describe Verifica::Authorizer do
   end
 
   it "raises exception if action is not registered for resource" do
-    current_user = user_class.new(SecureRandom.uuid, root_sids)
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(id: SecureRandom.uuid, sids: root_sids)
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
     unknown_msg = "'unknown_action' action is not registered as possible for 'post' resource"
 
     expect { authorizer.authorized?(current_user, post, :unknown_action) }
@@ -117,7 +117,7 @@ RSpec.describe Verifica::Authorizer do
   end
 
   it "raises exception for invalid or unknown resource" do
-    current_user = user_class.new(SecureRandom.uuid, root_sids)
+    current_user = user_class.new(id: SecureRandom.uuid, sids: root_sids)
     unknown_type = Class.new do
       def resource_type = :unknown_type
     end.new
@@ -134,7 +134,7 @@ RSpec.describe Verifica::Authorizer do
   end
 
   it "raises exception for invalid or unknown subject" do
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
     nil_sids = Class.new do
       def subject_id = SecureRandom.uuid
 
@@ -163,8 +163,8 @@ RSpec.describe Verifica::Authorizer do
     verifica = Verifica.authorizer do |config|
       config.register_resource :post, %i[read write comment delete], provider
     end
-    current_user = user_class.new(SecureRandom.uuid, root_sids)
-    post = post_class.new(SecureRandom.uuid, SecureRandom.uuid)
+    current_user = user_class.new(id: SecureRandom.uuid, sids: root_sids)
+    post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
 
     allow(provider).to receive(:call).and_return(nil)
     msg = "'post' resource acl_provider should respond to #call with Acl object but got 'NilClass'"
