@@ -15,6 +15,18 @@ module Verifica
     sids
   end
 
+  # Authorizer is the heart of Verifica. It's an isolated container with no global state
+  # which has a list of resource types registered with their companion AclProviders.
+  #
+  # Authorizer pairs great with Dependency Injection or can be configured and passed in a way that is compatible with your framework.
+  #
+  # @example (see Verifica)
+  #
+  # @see Verifica.authorizer
+  # @see Configuration
+  # @see ResourceConfiguration
+  #
+  # @api public
   class Authorizer
     # @note Use {Verifica.authorizer} instead of this constructor directly
     #

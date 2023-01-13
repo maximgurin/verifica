@@ -9,7 +9,7 @@ Verifica is Ruby's most scalable authorization solution ready to handle sophisti
 
 - Framework and database agnostic
 - Scalable. Start from 10, grow to 10M records in the database while having the same authorization architecture
-- Supports any type of actor in your application. Traditional `current_user`, external service, API client, you name it
+- Supports any actor in your application. Traditional `current_user`, external service, API client, you name it
 - No global state. Only local, immutable objects
 - Plain old Ruby, zero dependencies, no magic
 
@@ -108,7 +108,7 @@ Here is an explanation of each component:
 Security subject is a user, process, or system granted access to specific resources.
 In most applications the subject is currently authenticated user, aka `current_user`.
 
-In code a subject could be represented by any object that responds to `subject_id`, `subject_type`, and `subject_sids`.
+In code a subject could be represented by any object that responds to `#subject_id`, `#subject_type`, and `#subject_sids`.
 
 ```ruby
 class User
@@ -129,9 +129,9 @@ end
 ### Resource
 
 Resource refers to anything that requires protection.
-In most applications resources are entities stored in the database, such are Post, Comment, User, etc.
+In most applications resources are entities stored in the database, such as Post, Comment, User, etc.
 
-In code a resource could be represented by any object that responds to `resource_id` and `resource_type`.
+In code a resource could be represented by any object that responds to `#resource_id` and `#resource_type`.
 
 ```ruby
 class Post
@@ -147,7 +147,7 @@ end
 
 ### Action
 
-Action that Subject attempts to perform on a protected Resource. Represented as a Symbol in code,
+Action that Subject can perform on a protected Resource. Represented as a Symbol in code,
 it could be traditional `:read`, `:write`, `:delete` or more domain specific `:comment`, `:publish`, etc.
 
 ### Security Identifier
@@ -186,7 +186,7 @@ video_acl.to_a
 
 ### AclProvider
 
-AclProvider is an object that responds to `call(resource, **)` and returns ACL for the given resource.
+AclProvider is an object that responds to `#call(resource, **)` and returns ACL for the given resource.
 
 ```ruby
 class VideoAclProvider
