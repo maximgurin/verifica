@@ -24,7 +24,7 @@ Let's say you working on a video platform application:
 
 - You have 10M videos in the database
 - 7 types of user roles
-- 20 rules dictating who is allowed to access the video
+- 20 rules defining who is allowed to access the video
 - Rules require querying other entities too (video author settings, author's organization settings, etc.)
 
 Given all these, *how do you even find a list of videos available for `current_user`?*
@@ -168,8 +168,8 @@ anonymous_user.subject_sids    # => ["anonymous", "country:UA"]
 
 ### Access Control List
 
-ACL consists of Access Control Entities (ACEs) and defines which actions are allowed or denied for particular SIDs.
-ACL is associated with a particular protected resource in your system.
+ACL consists of Access Control Entries (ACEs) and defines which actions are allowed or denied for particular SIDs.
+ACL is associated with a specific protected resource in your system.
 
 ```ruby
 video_acl = Verifica::Acl.build do |acl|
@@ -209,6 +209,207 @@ Each Authorizer has a list of resource types registered with their companion Acl
 And most importantly, Authorizer has several methods to check the Subject's rights to perform a specific action on a given resource.
 
 Check the [Basic example](#basic-example) above to see how it all plays together.
+
+## Real-world example with Rails
+
+Let's say you started working on your *next big thing* idea — a video hosting application.
+In the beginning, you have only 2 user types and straightforward rules:
+
+- *Admins* can see all videos
+- *Users* can see their own videos and public videos of other users
+
+```ruby
+class Video
+  scope :available_for, ->(user) do
+    where(public: true).or(where(author_id: user.id)) unless user.admin?
+  end
+end
+
+class VideosController
+  def index
+    @videos = Video.available_for(current_user)
+  end
+end
+```
+
+Time goes by and 4 years later you have:
+
+- 10M records in the videos table. Organization and personal user accounts
+- 4 roles: *Admin*, *Moderator*, *Organization Admin*, *User*
+- Video drafts available only to their authors
+- Internal videos available only for members of the author's organization
+- Country restrictions, either in the *allowlist* or *denylist* modes
+- Distribution Settings entity with one-to-many relation to Videos
+  - Distribution mode: *public*, *internal*, or *private*
+  - Countries *allowlist* or *denylist*
+- Organization-wide country restrictions overrides Distribution Settings
+- *Organization Admins* can see private videos of their org members
+- *Admins* and *Moderators* can see all videos, regardless of country restrictions
+
+Wow, that's a pretty extensive list of requirements. Easy to get lost!
+Now the most exciting part. How do you implement `Video.available_for` method with so many details to consider?
+Videos table is big, so you can't use SQL joins to, let's say, check the video author's organization or other dependencies.
+And even if you can, a query with so many joins and conditions would be write-only anyway :)
+
+Here is how this challenge could be resolved using Verifica and ACL:
+
+```ruby
+# app/acl_providers/video_acl_provider.rb
+
+class VideoAclProvider
+  include Verifica::Sid
+
+  POSSIBLE_ACTIONS = [:read, :write, :delete].freeze
+
+  def call(video, **)
+    Verifica::Acl.build do |acl|
+      acl.allow root_sid, POSSIBLE_ACTIONS
+      acl.allow user_sid(video.author_id), POSSIBLE_ACTIONS
+      acl.allow role_sid("moderator"), [:read, :delete]
+
+      next if video.draft?
+
+      ds = video.distribution_setting
+      author_org = video.author.organization
+      allowed_countries = author_org&.allow_countries || ds.allow_countries
+      denied_countries = author_org&.deny_countries || ds.deny_countries
+      
+      # ...and 30 more lines to handle all our requirements
+    end
+  end
+end
+```
+
+```ruby
+# config/initializers/verifica.rb
+
+require "verifica"
+
+# Quick and dirty way for simplicity
+# In the real app, you could use DI container to hold configured Verifica::Authorizer instance
+Rails.configuration.after_initialize do
+  AUTHORIZER = Verifica.authorizer do |config|
+    config.register_resource :video, VideoAclProvider::POSSIBLE_ACTIONS, VideoAclProvider.new
+  end
+end
+```
+
+```ruby
+# app/models/user.rb
+
+class User < ApplicationRecord
+  include Verifica::Sid
+
+  alias_method :subject_id, :id
+
+  def subject_type = :user
+
+  def subject_sids(**)
+    case role
+    when "root"
+      [root_sid]
+    when "moderator"
+      [user_sid(id), role_sid("moderator")]
+    when "user"
+      sids = [authenticated_sid, user_sid(id), "country:#{country}"]
+      organization_id.try { |org_id| sids.push(organization_sid(org_id)) }
+      sids
+    when "organization_admin"
+      sids = [authenticated_sid, user_sid(id), "country:#{country}"]
+      sids.push(organization_sid(organization_id))
+      sids.push(role_sid("organization_admin:#{organization_id}"))
+    else
+      throw RuntimeError("Unsupported user role: #{role}")
+    end
+  end
+end
+```
+
+What we've done:
+
+- Configured `Verifica::Authorizer` object. It's available as `AUTHORIZER` constant anywhere in the app
+- Registered `:video` type as a secured resource. `VideoAclProvider` defines rules, who can do what
+- Configured `User` to be a security Subject. Each user has list of Security Identifiers depending on the role and other attributes
+
+Now, a few last steps and the challenge resolved:
+
+```ruby
+# db/migrate/20230113203815_add_read_sids_to_videos.rb
+
+# For simplicity, we are adding two String array columns directly to videos table.
+# In the real app, you could use something like ElasticSearch to hold videos with these companion columns
+class AddReadSidsToVideos < ActiveRecord::Migration[7.0]
+  def change
+    add_column :videos, :read_allow_sids, :string, null: false, array: true, default: []
+    add_column :videos, :read_deny_sids, :string, null: false, array: true, default: []
+  end
+end
+```
+
+```ruby
+# app/models/user.rb
+
+class Video < ApplicationRecord
+  attr_accessor :allowed_actions
+  alias_method :resource_id, :id
+
+  before_save :update_read_acl
+
+  def resource_type = :video
+  
+  def update_read_acl
+    acl = AUTHORIZER.resource_acl(self)
+    self.read_allow_sids = acl.allowed_sids(:read)
+    self.read_deny_sids = acl.denied_sids(:read)
+  end
+
+  # And finally, this is the goal. Straightforward implementation regardless of how complex our rules are.
+  scope :available_for, ->(user) do
+    sids = user.subject_sids
+    where("read_allow_sids && ARRAY[?]::varchar[]", sids).where.not("read_deny_sids && ARRAY[?]::varchar[]", sids)
+  end
+end
+```
+
+```ruby
+# app/controllers/videos_controller
+
+class VideosController
+  def index
+    @videos = Video.available_for(current_user).order(:name).limit(50)
+
+    # add list of allowed actions to videos so the frontend knows which buttons to show for each one
+    @videos.each do |video|
+      video.allowed_actions = AUTHORIZER.allowed_actions(current_user, video)
+    end
+  end
+  
+  def show
+    @video = Video.find(params[:id])
+    auth_result = AUTHORIZER.authorize(current_user, @video, :read)
+    @video.allowed_actions = auth_result.allowed_actions
+  end
+
+  def destroy
+    video = Video.find(params[:id])
+    AUTHORIZER.authorize(current_user, video, :delete)
+    video.destroy
+  end
+end
+```
+
+Voila, we're done! Now, no matter how sophisticated our authorization rules are,
+we have a simple method to find available videos for any user.
+And no special handling for superusers as everyone goes through the unified mechanism.
+
+**Important points not covered in this example but needed in the real app**:
+
+- **Dependency change handling.** If country restrictions changed on the organization level you need run a background job\
+to find all affected videos and update `read_allow_sids`, `read_deny_sids` columns. Same applies to Distribution Settings and other dependencies.
+- **Rules change handling.** If implementation of `VideoAclProvider` changed you need to run a background job\
+to update `read_allow_sids`, `read_deny_sids` columns for all videos.
+- **Cache, N+1 problem.** `VideoAclProvider` retrieves a chain of record associated with each video which leads to\
+N+1 problem in a naive implementation.
 
 ## Development
 

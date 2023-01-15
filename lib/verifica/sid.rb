@@ -17,7 +17,7 @@ module Verifica
   #
   # @example
   #   class User
-  #     extend Verifica::Sid
+  #     include Verifica::Sid
   #
   #     def id
   #       # ...
@@ -52,7 +52,7 @@ module Verifica
     #
     # @example
     #   class PostAclProvider
-    #     extend Verifica::Sid
+    #     include Verifica::Sid
     #
     #     def call(post, **)
     #       Verifica::Acl.build do |acl|
@@ -76,7 +76,7 @@ module Verifica
     #
     # @example
     #   class PostAclProvider
-    #     extend Verifica::Sid
+    #     include Verifica::Sid
     #
     #     def call(post)
     #       Verifica::Acl.build do |acl|
@@ -102,7 +102,7 @@ module Verifica
     #
     # @example
     #   class PostAclProvider
-    #     extend Verifica::Sid
+    #     include Verifica::Sid
     #
     #     ALL_ACTIONS = [:read, :write, :delete, :comment]
     #     ROOT_ACL = Acl.build { |acl| acl.allow root_sid, ALL_ACTIONS }
@@ -129,7 +129,7 @@ module Verifica
     #
     # @example
     #   class PostAclProvider
-    #     extend Verifica::Sid
+    #     include Verifica::Sid
     #
     #     def call(post, **)
     #       Verifica::Acl.build do |acl|
@@ -151,7 +151,7 @@ module Verifica
     #
     # @example
     #   class PostAclProvider
-    #     extend Verifica::Sid
+    #     include Verifica::Sid
     #
     #     def call(post, **)
     #       Verifica::Acl.build do |acl|
@@ -173,7 +173,7 @@ module Verifica
     #
     # @example
     #   class PostAclProvider
-    #     extend Verifica::Sid
+    #     include Verifica::Sid
     #
     #     def call(post, **)
     #       Verifica::Acl.build do |acl|
