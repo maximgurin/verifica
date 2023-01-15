@@ -78,8 +78,7 @@ require_relative "verifica/version"
 # @api public
 module Verifica
   EMPTY_ARRAY = [].freeze
-  EMPTY_SET = Set.new.freeze
-  private_constant :EMPTY_ARRAY, :EMPTY_SET
+  private_constant :EMPTY_ARRAY
 
   # Empty, frozen Access Control List. Semantically means that no actions are allowed
   #

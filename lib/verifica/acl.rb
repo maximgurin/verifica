@@ -98,12 +98,12 @@ module Verifica
     #
     # @param action (see #action_allowed?)
     #
-    # @return [Set<String>] frozen set of Security Identifiers allowed for a given action or empty set if none
+    # @return [Array<String>] array of Security Identifiers allowed for a given action or empty array if none
     #
     # @api public
     def allowed_sids(action)
       sids = @allow_deny_by_action.dig(action.to_sym, :allowed_sids)
-      sids.nil? ? EMPTY_SET : sids
+      sids.nil? ? EMPTY_ARRAY : sids.to_a
     end
 
     # @note Checking denied SIDs isn't enough to determine whether the action is allowed.
@@ -111,12 +111,12 @@ module Verifica
     #
     # @param action (see #action_allowed?)
     #
-    # @return [Set<String>] frozen set of Security Identifiers denied for a given action or empty set if none
+    # @return [Array<String>] array of Security Identifiers denied for a given action or empty array if none
     #
     # @api public
     def denied_sids(action)
       sids = @allow_deny_by_action.dig(action.to_sym, :denied_sids)
-      sids.nil? ? EMPTY_SET : sids
+      sids.nil? ? EMPTY_ARRAY : sids.to_a
     end
 
     # @param sids (see #action_allowed?)

@@ -67,7 +67,6 @@ RSpec.describe Verifica::Acl do
     sids = acl.allowed_sids(:comment)
 
     expect(sids).to contain_exactly(sid.user_sid(owner_user_id), sid.authenticated_sid)
-    expect(sids).to be_frozen
     expect(sids).to all(be_frozen)
   end
 
@@ -75,7 +74,6 @@ RSpec.describe Verifica::Acl do
     sids = acl.denied_sids(:read)
 
     expect(sids).to contain_exactly(sid.organization_sid(banned_organization_id))
-    expect(sids).to be_frozen
     expect(sids).to all(be_frozen)
   end
 
