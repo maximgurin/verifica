@@ -36,7 +36,7 @@ Bunch of `if/elsif` and enormous SQL query with many joins? Is there a better wa
 require 'verifica'
 
 User = Struct.new(:id, :role, keyword_init: true) do
-  # Verifica expects each security subject to reply to #subject_id, #subject_type, and #subject_sids
+  # Verifica expects each security subject to respond to #subject_id, #subject_type, and #subject_sids
   alias_method :subject_id, :id
   def subject_type = :user
 
@@ -46,7 +46,7 @@ User = Struct.new(:id, :role, keyword_init: true) do
 end
 
 Video = Struct.new(:id, :author_id, :public, keyword_init: true) do
-  # Verifica expects each secured resource to reply to #resource_id, and #resource_type
+  # Verifica expects each secured resource to respond to #resource_id, and #resource_type
   alias_method :resource_id, :id
   def resource_type = :video
 end

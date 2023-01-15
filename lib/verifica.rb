@@ -8,13 +8,13 @@ require_relative "verifica/errors"
 require_relative "verifica/sid"
 require_relative "verifica/version"
 
-# Verifica is Ruby's most scalable authorization solution ready to handle sophisticated authorization rules
+# Verifica is Ruby's most scalable authorization solution ready to handle sophisticated authorization rules.
 #
 # - Framework and database agnostic
 # - Scalable. Start from 10, grow to 10M records in the database while having the same authorization architecture
 # - Supports any actor in your application. Traditional +current_user+, external service, API client, you name it
 # - No global state. Only local, immutable objects
-# - Plain Ruby, zero dependencies, no magic
+# - Plain old Ruby, zero dependencies, no magic
 #
 # Verifica is designed around Access Control List. ACL clearly separates authorization rules definition
 # (who can do what for any given resource) and execution (can +current_user+ delete this post?).
@@ -23,7 +23,7 @@ require_relative "verifica/version"
 #   require 'verifica'
 #
 #   User = Struct.new(:id, :role, keyword_init: true) do
-#     # Verifica expects each security subject to reply to #subject_id, #subject_type, and #subject_sids
+#     # Verifica expects each security subject to respond to #subject_id, #subject_type, and #subject_sids
 #     alias_method :subject_id, :id
 #     def subject_type = :user
 #
@@ -33,7 +33,7 @@ require_relative "verifica/version"
 #   end
 #
 #   Video = Struct.new(:id, :author_id, :public, keyword_init: true) do
-#     # Verifica expects each secured resource to reply to #resource_id, and #resource_type
+#     # Verifica expects each secured resource to respond to #resource_id, and #resource_type
 #     alias_method :resource_id, :id
 #     def resource_type = :video
 #   end
