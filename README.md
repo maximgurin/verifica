@@ -377,16 +377,15 @@ end
 class VideosController
   def index
     @videos = Video.available_for(current_user).order(:name).limit(50)
-
-    # add list of allowed actions to videos so the frontend knows which buttons to show for each one
-    @videos.each do |video|
-      video.allowed_actions = AUTHORIZER.allowed_actions(current_user, video)
-    end
   end
   
   def show
     @video = Video.find(params[:id])
+    
+    # upon successful authorization helper object is returned with a bunch of useful info
     auth_result = AUTHORIZER.authorize(current_user, @video, :read)
+
+    # add list of allowed actions so the frontend knows whether show "Edit" and "Delete" buttons, for example
     @video.allowed_actions = auth_result.allowed_actions
   end
 
