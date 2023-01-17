@@ -127,6 +127,9 @@ module Verifica
 
     # Security Identifier of the regular user with given +user_id+.
     #
+    # @note An argument can't be +nil+ for safety reasons.
+    #   +nil+ can cause unpredictable consequences like two separate users sharing the same SID and access rights
+    #
     # @example
     #   class PostAclProvider
     #     include Verifica::Sid
@@ -144,10 +147,16 @@ module Verifica
     #
     # @api public
     def user_sid(user_id)
+      if user_id.nil?
+        raise ArgumentError, "Nil 'user_id' is unsafe. Use empty string if you absolutely need this behavior"
+      end
+
       "user:#{user_id}".freeze
     end
 
     # Security Identifier of the subject with given +role_id+.
+    #
+    # @note (see #user_sid)
     #
     # @example
     #   class PostAclProvider
@@ -166,10 +175,16 @@ module Verifica
     #
     # @api public
     def role_sid(role_id)
+      if role_id.nil?
+        raise ArgumentError, "Nil 'role_id' is unsafe. Use empty string if you absolutely need this behavior"
+      end
+
       "role:#{role_id}".freeze
     end
 
     # Security Identifier of the subject who is a member of the organization with given +organization_id+
+    #
+    # @note (see #user_sid)
     #
     # @example
     #   class PostAclProvider
@@ -190,6 +205,10 @@ module Verifica
     #
     # @api public
     def organization_sid(organization_id)
+      if organization_id.nil?
+        raise ArgumentError, "Nil 'organization_id' is unsafe. Use empty string if you absolutely need this behavior"
+      end
+
       "org:#{organization_id}".freeze
     end
   end
