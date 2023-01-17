@@ -29,6 +29,7 @@ Let's say you working on a video platform application:
 
 Given all these, *how do you even find a list of videos available for `current_user`?*
 Bunch of `if/elsif` and enormous SQL query with many joins? Is there a better way? Verifica shines for this kind of problem.
+In the [Real-world example with Rails](#real-world-example-with-rails) you can see the solution in detail.
 
 ## Basic example
 
@@ -340,8 +341,8 @@ Now, a few last steps and the challenge resolved:
 # In the real app, you could use something like ElasticSearch to hold videos with these companion columns
 class AddReadSidsToVideos < ActiveRecord::Migration[7.0]
   def change
-    add_column :videos, :read_allow_sids, :string, null: false, array: true, default: []
-    add_column :videos, :read_deny_sids, :string, null: false, array: true, default: []
+    add_column :videos, :read_allow_sids, :string, null: false, array: true, default: [], index: true
+    add_column :videos, :read_deny_sids, :string, null: false, array: true, default: [], index: true
   end
 end
 ```
@@ -363,7 +364,7 @@ class Video < ApplicationRecord
     self.read_deny_sids = acl.denied_sids(:read)
   end
 
-  # And finally, this is the goal. Straightforward implementation regardless of how complex our rules are.
+  # And finally, this is our goal. Straightforward implementation regardless of how complex the rules are.
   scope :available_for, ->(user) do
     sids = user.subject_sids
     where("read_allow_sids && ARRAY[?]::varchar[]", sids).where.not("read_deny_sids && ARRAY[?]::varchar[]", sids)
@@ -397,17 +398,18 @@ class VideosController
 end
 ```
 
-Voila, we're done! Now, no matter how sophisticated our authorization rules are,
-we have a simple method to find available videos for any user.
-And no special handling for superusers as everyone goes through the unified mechanism.
+Voila, we're done! So now, no matter how sophisticated our authorization rules are,
+we have a clear method to find available videos for any user.
+No conditions, no special handling for superusers as everyone goes through the unified mechanism.
 
 **Important points not covered in this example but needed in the real app**:
 
-- **Dependency change handling.** If country restrictions changed on the organization level you need run a background job\
-to find all affected videos and update `read_allow_sids`, `read_deny_sids` columns. Same applies to Distribution Settings and other dependencies.
-- **Rules change handling.** If implementation of `VideoAclProvider` changed you need to run a background job\
+- **Dependency change handling.** If country restrictions changed on the organization level you need to
+run a background job to find all affected videos and update `read_allow_sids`, `read_deny_sids` columns.
+Same applies to Distribution Settings and other dependencies.
+- **Rules change handling.** If implementation of `VideoAclProvider` changed you need to run a background job
 to update `read_allow_sids`, `read_deny_sids` columns for all videos.
-- **Cache, N+1 problem.** `VideoAclProvider` retrieves a chain of record associated with each video which leads to\
+- **Cache, N+1 problem.** `VideoAclProvider` retrieves a chain of records associated with each video which leads to
 N+1 problem in a naive implementation.
 
 ## Development
