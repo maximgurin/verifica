@@ -13,10 +13,12 @@ Verifica is Ruby's most scalable authorization solution ready to handle sophisti
 - No global state. Only local, immutable objects
 - Plain old Ruby, zero dependencies, no magic
 
-Verifica is designed around Access Control List. ACL clearly separates authorization rules definition
-(who can do what for any given resource) and execution (can `current_user` delete this post?).
+Verifica is designed around Access Control List. ACL powers a straightforward and unified authorization flow
+for any user and resource, regardless of how complex the authorization rules are.
 
-**Note: Verifica is under active development. The first public release, docs, and examples are coming soon.**
+*Note: Verifica is a new open-source gem, so you may wonder if it's reliable. Internally,
+this solution has been battle-tested in several B2B products, including one with over 15M database records.
+But anyway, trust nothing. DYOR.*
 
 ## Why Verifica? Isn't Pundit or CanCanCan enough?
 
@@ -91,6 +93,8 @@ authorizer.authorize(other_user, public_video, :write)
 ```
 
 ## Installation
+
+**Required Ruby version >= 3.0**
 
 Install the gem and add to the application's Gemfile by executing:
 
