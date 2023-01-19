@@ -213,6 +213,8 @@ Check the [Basic example](#basic-example) above to see how it all plays together
 
 ## Real-world example with Rails
 
+Demo: https://verifica-rails-example.maximgurin.com
+
 Let's say you started working on your *next big thing* idea — a video hosting application.
 In the beginning, you have only 2 user types and straightforward rules:
 
@@ -411,6 +413,11 @@ Same applies to Distribution Settings and other dependencies.
 to update `read_allow_sids`, `read_deny_sids` columns for all videos.
 - **Cache, N+1 problem.** `VideoAclProvider` retrieves a chain of records associated with each video which leads to
 N+1 problem in a naive implementation.
+
+See also:
+
+- Live demo - https://verifica-rails-example.maximgurin.com
+- Full source code - https://github.com/maximgurin/verifica-rails-example
 
 ## Development
 
