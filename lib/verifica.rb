@@ -54,7 +54,7 @@ require_relative "verifica/version"
 #   end
 #
 #   public_video = Video.new(id: 1, author_id: 1000, public: true)
-#   private_video = Video.new(id: 2, author_id: 1000, public: true)
+#   private_video = Video.new(id: 2, author_id: 1000, public: false)
 #
 #   superuser = User.new(id: 777, role: "root")
 #   video_author = User.new(id: 1000, role: "user")
