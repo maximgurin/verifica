@@ -186,9 +186,9 @@ end
 
 video_acl.to_a
 # =>
-# [#<Verifica::Ace:0x00007fab1955dd60 @action=:view, @allow=true, @sid="authenticated">,          
-#  #<Verifica::Ace:0x00007fab1955dd10 @action=:comment, @allow=true, @sid="authenticated">,       
-#  #<Verifica::Ace:0x00007fab1955dc48 @action=:view, @allow=false, @sid="country:US">]
+# [#<Verifica::Ace:0x00007fab1955dd60 @action=:read, @allow=true, @sid="authenticated">,
+#  #<Verifica::Ace:0x00007fab1955dd10 @action=:comment, @allow=true, @sid="authenticated">,
+#  #<Verifica::Ace:0x00007fab1955dc48 @action=:read, @allow=false, @sid="country:US">]
 ```
 
 ### AclProvider
