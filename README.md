@@ -212,8 +212,8 @@ end
 ### Authorizer
 
 And finally, Authorizer, the heart of Verifica. It couples all concepts above into an isolated container with no global state.
-Each Authorizer has a list of resource types registered with their companion AclProviders.
-And most importantly, Authorizer has several methods to check the Subject's rights to perform a specific action on a given resource.
+Each Authorizer has a list of resource types registered with their companion AclProviders and
+several methods to check the Subject's rights to perform a specific action on a given resource.
 
 Check the [Basic example](#basic-example) above to see how it all plays together.
 
@@ -356,7 +356,7 @@ end
 ```
 
 ```ruby
-# app/models/user.rb
+# app/models/video.rb
 
 class Video < ApplicationRecord
   attr_accessor :allowed_actions
@@ -385,7 +385,11 @@ end
 
 class VideosController
   def index
-    @videos = Video.available_for(current_user).order(:name).limit(50)
+    @videos = Video
+      .includes(:distribution_setting, author: [:organization])
+      .available_for(current_user)
+      .order(:name)
+      .limit(50)
   end
   
   def show
@@ -417,8 +421,6 @@ run a background job to find all affected videos and update `read_allow_sids`, `
 Same applies to Distribution Settings and other dependencies.
 - **Rules change handling.** If implementation of `VideoAclProvider` changed you need to run a background job
 to update `read_allow_sids`, `read_deny_sids` columns for all videos.
-- **Cache, N+1 problem.** `VideoAclProvider` retrieves a chain of records associated with each video which leads to
-N+1 problem in a naive implementation.
 
 See also:
 
