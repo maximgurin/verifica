@@ -24,7 +24,7 @@ But anyway, trust nothing. DYOR.*
 
 ## Why Verifica? Isn't Pundit or CanCanCan enough?
 
-Let's say you working on a video platform application:
+Let's say you are working on a video platform application:
 
 - You have 10M videos in the database
 - 7 types of user roles
