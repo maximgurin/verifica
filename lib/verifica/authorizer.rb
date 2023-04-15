@@ -141,6 +141,7 @@ module Verifica
     def resource_acl(resource, **context)
       config = config_by_resource(resource)
       acl = config.acl_provider.call(resource, **context)
+      # trade-off flexibility to increase robustness here by requiring a specific type
       unless acl.is_a?(Verifica::Acl)
         type = resource.resource_type
         raise Error, "'#{type}' resource acl_provider should respond to #call with Acl object but got '#{acl.class}'"

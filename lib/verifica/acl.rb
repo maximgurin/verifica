@@ -154,7 +154,7 @@ module Verifica
 
     # @example
     #   acl = Verifica::Acl.build { |acl| acl.allow "root", [:read, :write] }
-    #   acl.to_a.map(:to_h)
+    #   acl.to_a.map(&:to_h)
     #   # => [{:sid=>"root", :action=>:read, :allow=>true}, {:sid=>"root", :action=>:write, :allow=>true}]
     #
     # @return [Array<Ace>] a new array representing +self+
