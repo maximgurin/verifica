@@ -54,7 +54,6 @@ module Verifica
 
         allow_deny[:allowed_sids].freeze
         allow_deny[:denied_sids].freeze
-        allow_deny.freeze
       end
 
       @allowed_actions.freeze

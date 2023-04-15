@@ -18,10 +18,7 @@ RSpec.describe Verifica::Acl do
   let(:moderator_role_id) { "moderator" }
 
   it "is deep frozen after creation" do
-    aces = acl.to_a
-
-    expect(acl).to be_frozen
-    expect(aces).to all(be_frozen)
+    expect(Ractor.shareable?(acl)).to be true
   end
 
   it "#to_s" do

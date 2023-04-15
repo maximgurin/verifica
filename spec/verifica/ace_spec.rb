@@ -4,9 +4,7 @@ RSpec.describe Verifica::Ace do
   subject(:ace) { described_class.new("root", "read", true) }
 
   it "is deep frozen after creation" do
-    expect(ace).to be_frozen
-    expect(ace.sid).to be_frozen
-    expect(ace.action).to be_frozen
+    expect(Ractor.shareable?(ace)).to be true
   end
 
   it "returns correct #allow? #deny?" do
