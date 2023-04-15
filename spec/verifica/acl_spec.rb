@@ -22,9 +22,9 @@ RSpec.describe Verifica::Acl do
   end
 
   it "#to_s" do
-    short_acl = described_class.build { _1.allow "root", [:read] }
+    short_acl = described_class.build { _1.allow sid.country_sid("UA"), [:read] }
 
-    expect(short_acl.to_s).to be == '[{:sid=>"root", :action=>:read, :allow=>true}]'
+    expect(short_acl.to_s).to be == '[{:sid=>"country:UA", :action=>:read, :allow=>true}]'
   end
 
   it "returns new array on each #to_a call" do
@@ -147,7 +147,7 @@ RSpec.describe Verifica::Acl do
       acl.allow "root", %i[write]
     end
     new_acl = original_acl.build do |acl|
-      acl.allow "anonymous", %i[read]
+      acl.allow sid.group_sid(123), %i[read]
     end
 
     expected_original = described_class.build do |acl|
@@ -155,7 +155,7 @@ RSpec.describe Verifica::Acl do
     end
     expected_new = described_class.build do |acl|
       acl.allow "root", %i[write]
-      acl.allow "anonymous", %i[read]
+      acl.allow "group:123", %i[read]
     end
 
     expect(original_acl).to be == expected_original

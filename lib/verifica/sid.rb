@@ -211,5 +211,66 @@ module Verifica
 
       "org:#{organization_id}".freeze
     end
+
+    # Security Identifier of the subject who is a member of the group with given +group_id+
+    #
+    # @note (see #user_sid)
+    #
+    # @example
+    #   class PostAclProvider
+    #     include Verifica::Sid
+    #
+    #     def call(post, **)
+    #       Verifica::Acl.build do |acl|
+    #         post.editor_groups.each do |group_id|
+    #           acl.allow group_sid(group_id), [:edit, :delete]
+    #         end
+    #
+    #         # ...
+    #       end
+    #     end
+    #   end
+    #
+    # @return [String]
+    #
+    # @api public
+    def group_sid(group_id)
+      if group_id.nil?
+        raise ArgumentError, "Nil 'group_id' is unsafe. Use empty string if you absolutely need this behavior"
+      end
+
+      "group:#{group_id}".freeze
+    end
+
+    # Security Identifier of the subject whose country is the country with given +country_id+
+    #
+    # @note (see #user_sid)
+    #
+    # @example
+    #   class PostAclProvider
+    #     include Verifica::Sid
+    #
+    #     def call(post, **)
+    #       Verifica::Acl.build do |acl|
+    #         acl.allow authenticated_sid, [:read, :comment]
+    #         post.banned_countries.each do |country_id|
+    #           acl.deny country_sid(country_id), [:read, :comment]
+    #         end
+    #
+    #         # ...
+    #       end
+    #     end
+    #   end
+    #
+    # @return [String]
+    #
+    # @api public
+    def country_sid(country_id)
+      if country_id.nil?
+        raise ArgumentError, "Nil 'country_id' is unsafe. Use empty string if you absolutely need this behavior"
+      end
+
+      "country:#{country_id}".freeze
+    end
   end
 end

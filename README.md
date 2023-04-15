@@ -320,11 +320,11 @@ class User < ApplicationRecord
     when "moderator"
       [user_sid(id), role_sid("moderator")]
     when "user"
-      sids = [authenticated_sid, user_sid(id), "country:#{country}"]
+      sids = [authenticated_sid, user_sid(id), country_sid(country)]
       organization_id.try { |org_id| sids.push(organization_sid(org_id)) }
       sids
     when "organization_admin"
-      sids = [authenticated_sid, user_sid(id), "country:#{country}"]
+      sids = [authenticated_sid, user_sid(id), country_sid(country)]
       sids.push(organization_sid(organization_id))
       sids.push(role_sid("organization_admin:#{organization_id}"))
     else
