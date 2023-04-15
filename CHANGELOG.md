@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2023-04-15
+
+### Added
+
+- `Sid#country_sid` and `Sid#group_sid` helper methods
+
 ## [1.0.0] - 2023-01-19
 
 Initial public release
