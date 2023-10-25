@@ -20,7 +20,7 @@ for any user and resource, regardless of how complex the authorization rules are
 
 *Note: Verifica is a new open-source gem, so you may wonder if it's reliable. Internally,
 this solution has been battle-tested in several B2B products, including one with over 15M database records.
-But anyway, trust nothing. DYOR.*
+But DYOR anyway.*
 
 ## Why Verifica? Isn't Pundit or CanCanCan enough?
 
@@ -38,7 +38,7 @@ In the [Real-world example with Rails](#real-world-example-with-rails) you can s
 ## Basic example
 
 ```ruby
-require 'verifica'
+require "verifica"
 
 User = Struct.new(:id, :role, keyword_init: true) do
   # Verifica expects each security subject to respond to #subject_id, #subject_type, and #subject_sids
@@ -78,20 +78,26 @@ superuser = User.new(id: 777, role: "root")
 video_author = User.new(id: 1000, role: "user")
 other_user = User.new(id: 2000, role: "user")
 
-authorizer.authorized?(superuser, private_video, :delete)
-# true
+authorizer.authorized?(superuser, private_video, :delete) # => true
+authorizer.authorized?(video_author, private_video, :delete) # => true
+authorizer.authorized?(other_user, private_video, :read) # => false
+authorizer.authorized?(other_user, public_video, :comment) # => true
 
-authorizer.authorized?(video_author, private_video, :delete)
-# true
+begin
+  # raises Verifica::AuthorizationError: Authorization FAILURE. Subject 'user' id='2000'. Resource 'video' id='1'. Action 'write'
+  authorizer.authorize(other_user, public_video, :write)
+rescue Verifica::AuthorizationError => e
+  e.explain # => Long-form explanation of why action is not authorized, your debugging friend
+end
 
-authorizer.authorized?(other_user, private_video, :read)
-# false
-
-authorizer.authorized?(other_user, public_video, :comment)
-# true
-
-authorizer.authorize(other_user, public_video, :write)
-# raises Verifica::AuthorizationError: Authorization FAILURE. Subject 'user' id='2000'. Resource 'video' id='1'. Action 'write'
+# #authorization_result returns a special object with a bunch of useful info
+auth_result = authorizer.authorization_result(superuser, private_video, :delete)
+auth_result.success? # => true
+auth_result.subject_id # => 777
+auth_result.resource_type # => :video
+auth_result.action # => :delete
+auth_result.allowed_actions # => [:read, :write, :delete, :comment]
+auth_result.explain # => Long-form explanation of why action is authorized
 ```
 
 ## Installation
@@ -122,11 +128,11 @@ class User
   def subject_id
     123
   end
-  
+
   def subject_type
     :user
   end
-  
+
   def subject_sids
     ["root"] # see Security Identifier section below to understand what is this for
   end
@@ -145,7 +151,7 @@ class Post
   def resource_id
     1
   end
-  
+
   def resource_type
     :post
   end
@@ -282,7 +288,7 @@ class VideoAclProvider
       author_org = video.author.organization
       allowed_countries = author_org&.allow_countries || ds.allow_countries
       denied_countries = author_org&.deny_countries || ds.deny_countries
-      
+
       # ...and 30 more lines to handle all our requirements
     end
   end
@@ -365,7 +371,7 @@ class Video < ApplicationRecord
   before_save :update_read_acl
 
   def resource_type = :video
-  
+
   def update_read_acl
     acl = AUTHORIZER.resource_acl(self)
     self.read_allow_sids = acl.allowed_sids(:read)
@@ -391,10 +397,10 @@ class VideosController
       .order(:name)
       .limit(50)
   end
-  
+
   def show
     @video = Video.find(params[:id])
-    
+
     # upon successful authorization helper object is returned with a bunch of useful info
     auth_result = AUTHORIZER.authorize(current_user, @video, :read)
 

@@ -73,6 +73,11 @@ module Verifica
 
     # The same as {#authorize} but returns true/false instead of rising an exception
     #
+    # @param subject (see #authorize)
+    # @param resource (see #authorize)
+    # @param action (see #authorize)
+    # @param context (see #authorize)
+    #
     # @return [Boolean] true if +action+ on +resource+ is authorized for +subject+
     # @raise [Error] if +resource.resource_type+ isn't registered in +self+
     #
@@ -81,9 +86,31 @@ module Verifica
       authorization_result(subject, resource, action, **context).success?
     end
 
-    # @param subject [Object] subject of the authorization (e.g. current user, external service)
-    # @param resource [Object] resource to get allowed actions for, should respond to +#resource_type+
-    # @param **context (see #authorize)
+    # The same as {#authorize} but returns a special result object instead of rising an exception
+    #
+    # @param subject (see #authorize)
+    # @param resource (see #authorize)
+    # @param action (see #authorize)
+    # @param context (see #authorize)
+    #
+    # @return [AuthorizationResult] authorization result with all details
+    # @raise [Error] if +resource.resource_type+ isn't registered in +self+
+    #
+    # @api public
+    def authorization_result(subject, resource, action, **context)
+      action = action.to_sym
+      possible_actions = config_by_resource(resource).possible_actions
+      unless possible_actions.include?(action)
+        raise Error, "'#{action}' action is not registered as possible for '#{resource.resource_type}' resource"
+      end
+
+      acl = resource_acl(resource, **context)
+      AuthorizationResult.new(subject, resource, action, acl, **context)
+    end
+
+    # @param subject (see #authorize)
+    # @param resource (see #authorize)
+    # @param context (see #authorize)
     #
     # @return [Array<Symbol>] array of actions allowed for +subject+ or empty array if none
     # @raise [Error] if +resource.resource_type+ isn't registered in +self+
@@ -128,7 +155,7 @@ module Verifica
       @resources.key?(resource_type.to_sym)
     end
 
-    # @param resource [Object] resource to get ACL for, should respond to +#resource_type+
+    # @param resource (see #authorize)
     # @param context [Hash] arbitrary keyword arguments to forward to +acl_provider.call+
     #
     # @return [Acl] Access Control List for +resource+
@@ -172,17 +199,6 @@ module Verifica
       end
 
       resource_config(type)
-    end
-
-    private def authorization_result(subject, resource, action, **context)
-      action = action.to_sym
-      possible_actions = config_by_resource(resource).possible_actions
-      unless possible_actions.include?(action)
-        raise Error, "'#{action}' action is not registered as possible for '#{resource.resource_type}' resource"
-      end
-
-      acl = resource_acl(resource, **context)
-      AuthorizationResult.new(subject, resource, action, acl, **context)
     end
   end
 end

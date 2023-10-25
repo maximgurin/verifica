@@ -20,7 +20,7 @@ require_relative "verifica/version"
 # (who can do what for any given resource) and execution (can +current_user+ delete this post?).
 #
 # @example
-#   require 'verifica'
+#   require "verifica"
 #
 #   User = Struct.new(:id, :role, keyword_init: true) do
 #     # Verifica expects each security subject to respond to #subject_id, #subject_type, and #subject_sids
@@ -60,20 +60,26 @@ require_relative "verifica/version"
 #   video_author = User.new(id: 1000, role: "user")
 #   other_user = User.new(id: 2000, role: "user")
 #
-#   authorizer.authorized?(superuser, private_video, :delete)
-#   # true
+#   authorizer.authorized?(superuser, private_video, :delete) # => true
+#   authorizer.authorized?(video_author, private_video, :delete) # => true
+#   authorizer.authorized?(other_user, private_video, :read) # => false
+#   authorizer.authorized?(other_user, public_video, :comment) # => true
 #
-#   authorizer.authorized?(video_author, private_video, :delete)
-#   # true
+#   begin
+#     # raises Verifica::AuthorizationError: Authorization FAILURE. Subject 'user' id='2000'. Resource 'video' id='1'. Action 'write'
+#     authorizer.authorize(other_user, public_video, :write)
+#   rescue Verifica::AuthorizationError => e
+#     e.explain # => Long-form explanation of why action is not authorized, your debugging friend
+#   end
 #
-#   authorizer.authorized?(other_user, private_video, :read)
-#   # false
-#
-#   authorizer.authorized?(other_user, public_video, :comment)
-#   # true
-#
-#   authorizer.authorize(other_user, public_video, :write)
-#   # raises Verifica::AuthorizationError: Authorization FAILURE. Subject 'user' id='2000'. Resource 'video' id='1'. Action 'write'
+#   # #authorization_result returns a special object with a bunch of useful info
+#   auth_result = authorizer.authorization_result(superuser, private_video, :delete)
+#   auth_result.success? # => true
+#   auth_result.subject_id # => 777
+#   auth_result.resource_type # => :video
+#   auth_result.action # => :delete
+#   auth_result.allowed_actions # => [:read, :write, :delete, :comment]
+#   auth_result.explain # => Long-form explanation of why action is authorized
 #
 # @api public
 module Verifica
