@@ -24,7 +24,7 @@ RSpec.describe Verifica::Acl do
   it "#to_s" do
     short_acl = described_class.build { _1.allow sid.country_sid("UA"), [:read] }
 
-    expect(short_acl.to_s).to be == '[{:sid=>"country:UA", :action=>:read, :allow=>true}]'
+    expect(short_acl.to_s).to eq '[{:sid=>"country:UA", :action=>:read, :allow=>true}]'
   end
 
   it "returns new array on each #to_a call" do
@@ -138,8 +138,8 @@ RSpec.describe Verifica::Acl do
       acl.allow "root", %i[write]
     end
 
-    expect(first).to be == second
-    expect(first.hash).to be == second.hash
+    expect(first).to eq second
+    expect(first.hash).to eq second.hash
   end
 
   it "returns new ACL with additional ACEs from builder on #build call" do
@@ -158,8 +158,8 @@ RSpec.describe Verifica::Acl do
       acl.allow "group:123", %i[read]
     end
 
-    expect(original_acl).to be == expected_original
-    expect(new_acl).to be == expected_new
+    expect(original_acl).to eq expected_original
+    expect(new_acl).to eq expected_new
   end
 
   context "when action is not registered" do

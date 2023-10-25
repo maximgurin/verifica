@@ -47,11 +47,11 @@ RSpec.describe Verifica::Authorizer do
     result = authorizer.authorize(current_user, post, :delete)
 
     expect(result).to be_success
-    expect(result.subject_type).to be == :user
-    expect(result.subject_id).to be == current_user.subject_id
-    expect(result.resource_type).to be == :post
-    expect(result.resource_id).to be == post.resource_id
-    expect(result.allowed_actions).to be == %i[read write comment delete]
+    expect(result.subject_type).to eq :user
+    expect(result.subject_id).to eq current_user.subject_id
+    expect(result.resource_type).to eq :post
+    expect(result.resource_id).to eq post.resource_id
+    expect(result.allowed_actions).to eq %i[read write comment delete]
   end
 
   it "raises exception if action is not authorized" do
@@ -84,7 +84,7 @@ RSpec.describe Verifica::Authorizer do
     current_user = user_class.new(id: SecureRandom.uuid, sids: root_sids)
     post = post_class.new(id: SecureRandom.uuid, author_id: SecureRandom.uuid)
 
-    expect(authorizer.allowed_actions(current_user, post)).to be == %i[read write comment delete]
+    expect(authorizer.allowed_actions(current_user, post)).to eq %i[read write comment delete]
   end
 
   it "returns true/false in #authorized?" do
@@ -197,12 +197,9 @@ RSpec.describe Verifica::Authorizer do
     acl = Verifica::Acl.build { _1.allow sid.root_sid, %i[read write comment delete] }
     kwargs = {scope: "api", type: :internal}
 
-    allow(current_user).to receive(:subject_sids).and_return(root_sids)
-    allow(current_user).to receive(:subject_id).and_return(nil)
-    allow(current_user).to receive(:subject_type).and_return(nil)
+    allow(current_user).to receive_messages(subject_sids: root_sids, subject_id: nil, subject_type: nil)
     allow(provider).to receive(:call).and_return(acl)
-    allow(post).to receive(:resource_id).and_return(nil)
-    allow(post).to receive(:resource_type).and_return(:post)
+    allow(post).to receive_messages(resource_id: nil, resource_type: :post)
 
     verifica.authorize(current_user, post, :read, **kwargs)
 
